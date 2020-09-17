@@ -1,0 +1,18 @@
+int main() {
+
+	t = x <= (y + z);
+
+	(a/(k*(b+c)));
+
+	a/(k*(b+c));
+
+	x > y;
+
+	a = b;
+
+
+	int a,b,c;
+	float d,e,f;
+
+	a+b;
+}
