@@ -79,16 +79,10 @@ namespace CppCompiler.Analysers
 
                 A(tVal);
             }
-            else if (_lookAhead.TokenType == TokenType.Identifier)
+            else if (_lookAhead.TokenType == TokenType.Identifier ||
+                _lookAhead.TokenType == TokenType.LeftParenthesis)
             {
-                var idVal = ID();
-                O(idVal);
-            }
-            else if (_lookAhead.TokenType == TokenType.LeftParenthesis)
-            {
-                MatchLeftParenthesis();
-                var idVal = ID();
-                O(idVal);
+                O();
             }
 
             if (_lookAhead.TokenType == TokenType.Semicolon)
@@ -124,37 +118,52 @@ namespace CppCompiler.Analysers
             }
         }
 
-        private void O(string leftValue)
+        private void O()
         {
-            if (_lookAhead.TokenType.IsOperator())
+            if (_lookAhead.TokenType == TokenType.LeftParenthesis)
             {
+                MatchLeftParenthesis();
+                var leftValue = ID();
                 var opVal = OP();
 
                 if (_lookAhead.TokenType == TokenType.LeftParenthesis)
+                    P(opVal, leftValue);
+                else
                 {
-                    MatchLeftParenthesis();
                     var rightValue = ID();
-                    P(opVal, leftValue, rightValue);
-                    NextToken();
-
-                    if (_lookAhead.TokenType == TokenType.RightParenthesis)
-                        MatchRightParenthesis();
+                    G(opVal, leftValue, rightValue);
                 }
-                else if (_lookAhead.TokenType == TokenType.Identifier)
-                {
-                    var rightValue = ID();
 
-                    if (_lookAhead.TokenType.IsOperator())
-                        P(opVal, leftValue, rightValue);
-                    else
-                        G(opVal, leftValue, rightValue);
+                if (_lookAhead.TokenType == TokenType.RightParenthesis)
+                    MatchRightParenthesis();
+
+                if (_lookAhead.TokenType.IsOperator())
+                {
+                    var op = OP();
+                    P(op, "ans");
+                }
+            }
+            else if (_lookAhead.TokenType == TokenType.Identifier)
+            {
+                var leftValue = ID();
+
+                if (_lookAhead.TokenType.IsOperator())
+                {
+                    var opVal = OP();
+
+                    if (_lookAhead.TokenType == TokenType.Identifier)
+                    {
+                        // if()
+                    }
+
+                    P(opVal, leftValue);
                 }
             }
         }
 
-        private void P(string opVal, string leftValue, string rightValue)
+        private void P(string opVal, string leftValue)
         {
-            O(rightValue);
+            O();
 
             _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
             {

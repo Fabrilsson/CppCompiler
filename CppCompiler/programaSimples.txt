@@ -1,6 +1,8 @@
 int main() {
 
 	t = x <= (y + z);
+	(x + y) * (a - b);
+
 
 	(a/(k*(b+c)));
 
