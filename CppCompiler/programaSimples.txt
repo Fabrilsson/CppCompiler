@@ -1,18 +1,17 @@
 int main() {
+	a = b;
+
+	j = x * y ^ z;
+
 	(x + y) * (a - b) * (a + g);
 
 	t = x <= (y + z);
-
-	a = b;
 
 	(a/(k*(b+c)));
 
 	a/(k*(b+c));
 
 	(x > y);
-
-	
-
 
 	int a,b,c;
 	float d,e,f;

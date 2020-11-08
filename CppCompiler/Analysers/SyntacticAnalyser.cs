@@ -13,11 +13,20 @@ namespace CppCompiler.Analysers
 
         private List<SyntaticAnalyserResult> _syntaticAnalyserResults;
 
+        private Stack<string> _temporaryVarStack;
+
+        private Stack<string> _stack;
+
+        private int _temporaryVarCounter;
+
         public SyntacticAnalyser(List<Token> tokens)
         {
             _tokens = tokens;
             _lookAhead = tokens.FirstOrDefault();
             _syntaticAnalyserResults = new List<SyntaticAnalyserResult>();
+            _temporaryVarStack = new Stack<string>();
+            _stack = new Stack<string>();
+            _temporaryVarCounter = 0;
         }
 
         internal void Execute()
@@ -82,7 +91,6 @@ namespace CppCompiler.Analysers
             else if (_lookAhead.TokenType == TokenType.Identifier ||
                 _lookAhead.TokenType == TokenType.LeftParenthesis)
             {
-                //O();
                 O();
             }
 
@@ -160,6 +168,14 @@ namespace CppCompiler.Analysers
                                 LeftValue = "ans",
                                 RightValue = "ans"
                             });
+
+                            var temp1 = _temporaryVarStack.Pop();
+                            var temp2 = _temporaryVarStack.Pop();
+
+                            _stack.Push($"T{_temporaryVarCounter} = {temp1} {newOpVal} {temp2}");
+                            _temporaryVarStack.Push($"T{_temporaryVarCounter}");
+
+                            _temporaryVarCounter++;
                         }
                     }
 
@@ -175,6 +191,10 @@ namespace CppCompiler.Analysers
                             LeftValue = leftValue,
                             RightValue = "ans"
                         });
+
+                        var temp = _temporaryVarStack.Pop();
+
+                        GenerateC3E(leftValue, opVal, temp);
                     }
                 }
             }
@@ -190,6 +210,10 @@ namespace CppCompiler.Analysers
                 LeftValue = leftValue,
                 RightValue = "ans"
             });
+
+            var rightValue = _temporaryVarStack.Pop();
+
+            GenerateC3E(leftValue, opVal, rightValue);
         }
 
         private void G(string opVal, string leftValue, string rightValue)
@@ -200,6 +224,8 @@ namespace CppCompiler.Analysers
                 LeftValue = leftValue,
                 RightValue = rightValue
             });
+
+            GenerateC3E(leftValue, opVal, rightValue);
         }
 
         private void NextToken()
@@ -256,6 +282,20 @@ namespace CppCompiler.Analysers
                 NextToken();
             }
             else { }
+        }
+
+        private void GenerateC3E(string leftValue, string opVal, string rightValue)
+        {
+            if (opVal != "=")
+            {
+                _stack.Push($"T{_temporaryVarCounter} = {leftValue} {opVal} {rightValue}");
+                _temporaryVarStack.Push($"T{_temporaryVarCounter}");
+                _temporaryVarCounter++;
+            }
+            else
+            {
+                _stack.Push($"{leftValue} {opVal} {rightValue}");
+            }
         }
     }
 }
