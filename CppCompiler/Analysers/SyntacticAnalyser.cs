@@ -13,11 +13,20 @@ namespace CppCompiler.Analysers
 
         private List<SyntaticAnalyserResult> _syntaticAnalyserResults;
 
+        private Stack<string> _temporaryVarStack;
+
+        private Stack<string> _stack;
+
+        private int _temporaryVarCounter;
+
         public SyntacticAnalyser(List<Token> tokens)
         {
             _tokens = tokens;
             _lookAhead = tokens.FirstOrDefault();
             _syntaticAnalyserResults = new List<SyntaticAnalyserResult>();
+            _temporaryVarStack = new Stack<string>();
+            _stack = new Stack<string>();
+            _temporaryVarCounter = 0;
         }
 
         internal void Execute()
@@ -79,16 +88,10 @@ namespace CppCompiler.Analysers
 
                 A(tVal);
             }
-            else if (_lookAhead.TokenType == TokenType.Identifier)
+            else if (_lookAhead.TokenType == TokenType.Identifier ||
+                _lookAhead.TokenType == TokenType.LeftParenthesis)
             {
-                var idVal = ID();
-                O(idVal);
-            }
-            else if (_lookAhead.TokenType == TokenType.LeftParenthesis)
-            {
-                MatchLeftParenthesis();
-                var idVal = ID();
-                O(idVal);
+                O();
             }
 
             if (_lookAhead.TokenType == TokenType.Semicolon)
@@ -124,37 +127,82 @@ namespace CppCompiler.Analysers
             }
         }
 
-        private void O(string leftValue)
+        private void O()
         {
-            if (_lookAhead.TokenType.IsOperator())
+            if (_lookAhead.TokenType == TokenType.LeftParenthesis)
             {
+                MatchLeftParenthesis();
+                O();
+                MatchRightParenthesis();
+            }
+
+            if (_lookAhead.TokenType == TokenType.Identifier)
+            {
+                var leftValue = ID();
                 var opVal = OP();
 
                 if (_lookAhead.TokenType == TokenType.LeftParenthesis)
-                {
-                    MatchLeftParenthesis();
-                    var rightValue = ID();
-                    P(opVal, leftValue, rightValue);
-                    NextToken();
+                    P(opVal, leftValue);
 
-                    if (_lookAhead.TokenType == TokenType.RightParenthesis)
-                        MatchRightParenthesis();
-                }
-                else if (_lookAhead.TokenType == TokenType.Identifier)
+                if (_lookAhead.TokenType == TokenType.Identifier)
                 {
                     var rightValue = ID();
+
+                    if (_lookAhead.TokenType == TokenType.Semicolon ||
+                        _lookAhead.TokenType == TokenType.RightParenthesis)
+                    {
+                        G(opVal, leftValue, rightValue);
+
+                        if (_lookAhead.TokenType == TokenType.RightParenthesis)
+                            MatchRightParenthesis();
+
+                        if (_lookAhead.TokenType.IsOperator())
+                        {
+                            var newOpVal = OP();
+
+                            O();
+
+                            _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
+                            {
+                                Operator = newOpVal,
+                                LeftValue = "ans",
+                                RightValue = "ans"
+                            });
+
+                            var temp1 = _temporaryVarStack.Pop();
+                            var temp2 = _temporaryVarStack.Pop();
+
+                            _stack.Push($"T{_temporaryVarCounter} = {temp1} {newOpVal} {temp2}");
+                            _temporaryVarStack.Push($"T{_temporaryVarCounter}");
+
+                            _temporaryVarCounter++;
+                        }
+                    }
 
                     if (_lookAhead.TokenType.IsOperator())
-                        P(opVal, leftValue, rightValue);
-                    else
-                        G(opVal, leftValue, rightValue);
+                    {
+                        var newOpVal = OP();                        
+
+                        P(newOpVal, rightValue);
+
+                        _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
+                        {
+                            Operator = opVal,
+                            LeftValue = leftValue,
+                            RightValue = "ans"
+                        });
+
+                        var temp = _temporaryVarStack.Pop();
+
+                        GenerateC3E(leftValue, opVal, temp);
+                    }
                 }
             }
         }
 
-        private void P(string opVal, string leftValue, string rightValue)
+        private void P(string opVal, string leftValue)
         {
-            O(rightValue);
+            O();
 
             _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
             {
@@ -162,6 +210,10 @@ namespace CppCompiler.Analysers
                 LeftValue = leftValue,
                 RightValue = "ans"
             });
+
+            var rightValue = _temporaryVarStack.Pop();
+
+            GenerateC3E(leftValue, opVal, rightValue);
         }
 
         private void G(string opVal, string leftValue, string rightValue)
@@ -172,6 +224,8 @@ namespace CppCompiler.Analysers
                 LeftValue = leftValue,
                 RightValue = rightValue
             });
+
+            GenerateC3E(leftValue, opVal, rightValue);
         }
 
         private void NextToken()
@@ -228,6 +282,20 @@ namespace CppCompiler.Analysers
                 NextToken();
             }
             else { }
+        }
+
+        private void GenerateC3E(string leftValue, string opVal, string rightValue)
+        {
+            if (opVal != "=")
+            {
+                _stack.Push($"T{_temporaryVarCounter} = {leftValue} {opVal} {rightValue}");
+                _temporaryVarStack.Push($"T{_temporaryVarCounter}");
+                _temporaryVarCounter++;
+            }
+            else
+            {
+                _stack.Push($"{leftValue} {opVal} {rightValue}");
+            }
         }
     }
 }
