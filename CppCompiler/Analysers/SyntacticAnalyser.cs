@@ -15,7 +15,7 @@ namespace CppCompiler.Analysers
 
         private Stack<string> _temporaryVarStack;
 
-        private Stack<string> _stack;
+        private Stack<string> _c3eStack;
 
         private int _temporaryVarCounter;
 
@@ -25,7 +25,7 @@ namespace CppCompiler.Analysers
             _lookAhead = tokens.FirstOrDefault();
             _syntaticAnalyserResults = new List<SyntaticAnalyserResult>();
             _temporaryVarStack = new Stack<string>();
-            _stack = new Stack<string>();
+            _c3eStack = new Stack<string>();
             _temporaryVarCounter = 0;
         }
 
@@ -285,13 +285,13 @@ namespace CppCompiler.Analysers
         {
             if (opVal != "=")
             {
-                _stack.Push($"T{_temporaryVarCounter} = {leftValue} {opVal} {rightValue}");
+                _c3eStack.Push($"T{_temporaryVarCounter} = {leftValue} {opVal} {rightValue}");
                 _temporaryVarStack.Push($"T{_temporaryVarCounter}");
                 _temporaryVarCounter++;
             }
             else
             {
-                _stack.Push($"{leftValue} {opVal} {rightValue}");
+                _c3eStack.Push($"{leftValue} {opVal} {rightValue}");
             }
         }
     }
