@@ -172,10 +172,7 @@ namespace CppCompiler.Analysers
                             var temp1 = _temporaryVarStack.Pop();
                             var temp2 = _temporaryVarStack.Pop();
 
-                            _stack.Push($"T{_temporaryVarCounter} = {temp1} {newOpVal} {temp2}");
-                            _temporaryVarStack.Push($"T{_temporaryVarCounter}");
-
-                            _temporaryVarCounter++;
+                            GenerateC3E(temp1, opVal, temp2);
                         }
                     }
 
