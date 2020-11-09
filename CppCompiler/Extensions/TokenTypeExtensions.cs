@@ -38,6 +38,7 @@
                 tokenType == TokenType.NotEqualToOperator ||
                 tokenType == TokenType.NotOperator ||
                 tokenType == TokenType.OrOperator ||
+                tokenType == TokenType.PowOperator ||
                 tokenType == TokenType.SubtractionOperator;
         }
     }

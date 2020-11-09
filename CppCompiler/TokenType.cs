@@ -37,6 +37,7 @@
         DivisionOperator,
         ModuleOperator,
         AssignmentOperator,
+        PowOperator,
 
         // Compound Operators
         IncrementOperator,
