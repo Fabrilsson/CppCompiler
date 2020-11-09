@@ -51,6 +51,7 @@ namespace CppCompiler.Analysers
             patterns.Add(TokenType.LessThanOrEqualToOperator, @"([<][=])");
             patterns.Add(TokenType.LessThanOperator, "([<])");
             patterns.Add(TokenType.GreaterThanOperator, "([>])");
+            patterns.Add(TokenType.PowOperator, @"([\^])");
             patterns.Add(TokenType.EqualToOperator, @"([=][=])");
             patterns.Add(TokenType.OrOperator, @"([|][|])");
             patterns.Add(TokenType.AssignmentOperator, "([=])");
