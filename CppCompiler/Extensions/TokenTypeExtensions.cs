@@ -41,5 +41,22 @@
                 tokenType == TokenType.PowOperator ||
                 tokenType == TokenType.SubtractionOperator;
         }
+
+        internal static bool IsBooleanOperator(this TokenType tokenType)
+        {
+            return tokenType == TokenType.LessThanOperator ||
+                tokenType == TokenType.LessThanOrEqualToOperator ||
+                tokenType == TokenType.GreaterThanOperator ||
+                tokenType == TokenType.GreaterThanOrEqualToOperator ||
+                tokenType == TokenType.NotEqualToOperator ||
+                tokenType == TokenType.EqualToOperator;
+        }
+
+        internal static bool IsNumber(this TokenType tokenType)
+        {
+            return tokenType == TokenType.IntegerConstant ||
+                tokenType == TokenType.FloatingPointConstant ||
+                tokenType == TokenType.LongConstant;
+        }
     }
 }

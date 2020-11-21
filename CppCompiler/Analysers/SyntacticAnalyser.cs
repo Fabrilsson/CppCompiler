@@ -69,216 +69,213 @@ namespace CppCompiler.Analysers
             if (_lookAhead.TokenType == TokenType.RightChaves)
                 return;
 
-            S();
+            E();
             D();
         }
 
-        private void S()
+        private void E()
         {
-            if (_lookAhead.TokenType.IsType())
+            var leftValue = TT();
+            R(leftValue);
+            MatchToken();
+        }
+
+        private void R(string leftValue)
+        {
+            if (_lookAhead.TokenType == TokenType.AdditionOperator)
             {
-                var tVal = T();
-                var idVal = ID();
+                var opVal = MatchToken();
+                var rightValue = TT();
+
+                string newLeftValue = string.Empty, newRightValue = string.Empty;
+
+                if (_temporaryVarStack.Any() && rightValue is null)
+                    newRightValue = _temporaryVarStack.Pop();
+
+                if (_temporaryVarStack.Any() && leftValue is null)
+                    newLeftValue = _temporaryVarStack.Pop();
 
                 _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
                 {
-                    TokenType = tVal,
-                    LeftValue = idVal
+                    Operator = opVal,
+                    LeftValue = leftValue is null ? newLeftValue : leftValue,
+                    RightValue = rightValue is null ? newRightValue : rightValue
                 });
 
-                A(tVal);
-            }
-            else if (_lookAhead.TokenType == TokenType.Identifier ||
-                _lookAhead.TokenType == TokenType.LeftParenthesis)
-            {
-                O();
-            }
+                GenerateC3E(leftValue is null ? newLeftValue : leftValue, opVal, rightValue is null ? newRightValue : rightValue);
 
-            if (_lookAhead.TokenType == TokenType.Semicolon)
-                MatchSemicolon();
+                if (_temporaryVarStack.Any() && leftValue is null)
+                    newLeftValue = _temporaryVarStack.Pop();
+
+                R(newLeftValue);
+            }
+            else if (_lookAhead.TokenType == TokenType.SubtractionOperator)
+            {
+                var opVal = MatchToken();
+                var rightValue = TT();
+
+                string newLeftValue = string.Empty, newRightValue = string.Empty;
+
+                if (_temporaryVarStack.Any() && rightValue is null)
+                    newRightValue = _temporaryVarStack.Pop();
+
+                if (_temporaryVarStack.Any() && leftValue is null)
+                    newLeftValue = _temporaryVarStack.Pop();
+
+                _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
+                {
+                    Operator = opVal,
+                    LeftValue = leftValue is null ? newLeftValue : leftValue,
+                    RightValue = rightValue is null ? newRightValue : rightValue
+                });
+
+                GenerateC3E(leftValue is null ? newLeftValue : leftValue, opVal, rightValue is null ? newRightValue : rightValue);
+
+                if (_temporaryVarStack.Any() && leftValue is null)
+                    newLeftValue = _temporaryVarStack.Pop();
+
+                R(newLeftValue);
+            }
         }
 
-        private string ID()
+        private string TT()
         {
-            if (_lookAhead.TokenType == TokenType.Identifier)
+            var leftValue = F();
+            SS(leftValue);
+
+            return leftValue;
+        }
+
+        private void SS(string leftValue)
+        {
+            if (_lookAhead.TokenType == TokenType.MultiplicationOperator)
             {
-                var token = _lookAhead;
-                NextToken();
-                return token.TokenValue;
+                var opVal = MatchToken();
+                var rightValue = F();
+
+                string newLeftValue = string.Empty, newRightValue = string.Empty;
+
+                if (_temporaryVarStack.Any() && rightValue is null)
+                    newRightValue = _temporaryVarStack.Pop();
+
+                if (_temporaryVarStack.Any() && leftValue is null)
+                    newLeftValue = _temporaryVarStack.Pop();
+
+                _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
+                {
+                    Operator = opVal,
+                    LeftValue = leftValue is null ? newLeftValue : leftValue,
+                    RightValue = rightValue is null ? newRightValue : rightValue
+                });
+
+                GenerateC3E(leftValue is null ? newLeftValue : leftValue, opVal, rightValue is null ? newRightValue : rightValue);
+
+                if (_temporaryVarStack.Any() && leftValue is null)
+                    newLeftValue = _temporaryVarStack.Pop();
+
+                SS(newLeftValue);
+            }
+            else if (_lookAhead.TokenType == TokenType.DivisionOperator)
+            {
+                var opVal = MatchToken();
+                var rightValue = F();
+
+                string newLeftValue = string.Empty, newRightValue = string.Empty;
+
+                if (_temporaryVarStack.Any() && rightValue is null)
+                    newRightValue = _temporaryVarStack.Pop();
+
+                if (_temporaryVarStack.Any() && leftValue is null)
+                    newLeftValue = _temporaryVarStack.Pop();
+
+                _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
+                {
+                    Operator = opVal,
+                    LeftValue = leftValue is null ? newLeftValue : leftValue,
+                    RightValue = rightValue is null ? newRightValue : rightValue
+                });
+
+                GenerateC3E(leftValue is null ? newLeftValue : leftValue, opVal, rightValue is null ? newRightValue : rightValue);
+
+                if (_temporaryVarStack.Any() && leftValue is null)
+                    newLeftValue = _temporaryVarStack.Pop();
+
+                SS(newLeftValue);
+            }
+        }
+
+        private string F()
+        {
+            var leftValue = G();
+            H(leftValue);
+
+            return leftValue;
+        }
+
+        private void H(string leftValue)
+        {
+            if (_lookAhead.TokenType == TokenType.PowOperator)
+            {
+                var opVal = MatchToken();
+                var rightValue = G();
+
+                string newLeftValue = string.Empty, newRightValue = string.Empty;
+
+                if (_temporaryVarStack.Any() && rightValue is null)
+                    newRightValue = _temporaryVarStack.Pop();
+
+                if (_temporaryVarStack.Any() && leftValue is null)
+                    newLeftValue = _temporaryVarStack.Pop();
+
+                _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
+                {
+                    Operator = opVal,
+                    LeftValue = leftValue is null ? newLeftValue : leftValue,
+                    RightValue = rightValue is null ? newRightValue : rightValue
+                });
+
+                GenerateC3E(leftValue is null ? newLeftValue : leftValue, opVal, rightValue is null ? newRightValue : rightValue);
+
+                if (_temporaryVarStack.Any() && leftValue is null)
+                    newLeftValue = _temporaryVarStack.Pop();
+
+                H(newLeftValue);
+            }
+        }
+
+        private string G()
+        {
+            if(_lookAhead.TokenType == TokenType.LeftParenthesis)
+            {
+                MatchToken();
+                var leftValue = TT();
+                R(leftValue);
+                MatchToken();
+
+                return null;
+            }
+            else if (_lookAhead.TokenType.IsNumber())
+            {
+                return MatchToken();
+            }
+            else if (_lookAhead.TokenType == TokenType.Identifier)
+            {
+                return MatchToken();
             }
 
             return null;
         }
 
-        private void A(TokenType tokenType)
+        private string MatchToken()
         {
-            if(_lookAhead.TokenType == TokenType.Comma)
-            {
-                NextToken();
-                var idVal = ID();
-
-                _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
-                {
-                    TokenType = tokenType,
-                    LeftValue = idVal
-                });
-
-                A(tokenType);
-            }
-        }
-
-        private void O()
-        {
-            if (_lookAhead.TokenType == TokenType.LeftParenthesis)
-            {
-                MatchLeftParenthesis();
-                O();
-                MatchRightParenthesis();
-            }
-
-            if (_lookAhead.TokenType == TokenType.Identifier)
-            {
-                var leftValue = ID();
-                var opVal = OP();
-
-                if (_lookAhead.TokenType == TokenType.LeftParenthesis)
-                    P(opVal, leftValue);
-
-                if (_lookAhead.TokenType == TokenType.Identifier)
-                {
-                    var rightValue = ID();
-
-                    if (_lookAhead.TokenType == TokenType.Semicolon ||
-                        _lookAhead.TokenType == TokenType.RightParenthesis)
-                    {
-                        G(opVal, leftValue, rightValue);
-
-                        if (_lookAhead.TokenType == TokenType.RightParenthesis)
-                            MatchRightParenthesis();
-
-                        if (_lookAhead.TokenType.IsOperator())
-                        {
-                            var newOpVal = OP();
-
-                            O();
-
-                            _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
-                            {
-                                Operator = newOpVal,
-                                LeftValue = "ans",
-                                RightValue = "ans"
-                            });
-
-                            var temp1 = _temporaryVarStack.Pop();
-                            var temp2 = _temporaryVarStack.Pop();
-
-                            GenerateC3E(temp1, newOpVal, temp2);
-                        }
-                    }
-
-                    if (_lookAhead.TokenType.IsOperator())
-                    {
-                        var newOpVal = OP();                        
-
-                        P(newOpVal, rightValue);
-
-                        _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
-                        {
-                            Operator = opVal,
-                            LeftValue = leftValue,
-                            RightValue = "ans"
-                        });
-
-                        var temp = _temporaryVarStack.Pop();
-
-                        GenerateC3E(leftValue, opVal, temp);
-                    }
-                }
-            }
-        }
-
-        private void P(string opVal, string leftValue)
-        {
-            O();
-
-            _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
-            {
-                Operator = opVal,
-                LeftValue = leftValue,
-                RightValue = "ans"
-            });
-
-            var rightValue = _temporaryVarStack.Pop();
-
-            GenerateC3E(leftValue, opVal, rightValue);
-        }
-
-        private void G(string opVal, string leftValue, string rightValue)
-        {
-            _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
-            {
-                Operator = opVal,
-                LeftValue = leftValue,
-                RightValue = rightValue
-            });
-
-            GenerateC3E(leftValue, opVal, rightValue);
+            var token = _lookAhead;
+            NextToken();
+            return token.TokenValue;
         }
 
         private void NextToken()
         {
             _lookAhead = _lookAhead.Next(_tokens);
-        }
-
-        private string OP()
-        {
-            if (_lookAhead.TokenType.IsOperator())
-            {
-                var token = _lookAhead;
-                NextToken();
-                return token.TokenValue;
-            }
-
-            return null;
-        }
-
-        private TokenType T()
-        {
-            if (_lookAhead.TokenType.IsType())
-            {
-                var token = _lookAhead;
-                NextToken();
-                return token.TokenType;
-            }
-
-            return TokenType.Undefined ;
-        }
-
-        private void MatchLeftParenthesis()
-        {
-            if (_lookAhead.TokenType == TokenType.LeftParenthesis)
-            {
-                NextToken();
-            }
-            else { }
-        }
-
-        private void MatchRightParenthesis()
-        {
-            if (_lookAhead.TokenType == TokenType.RightParenthesis)
-            {
-                NextToken();
-            }
-            else { }
-        }
-
-        private void MatchSemicolon()
-        {
-            if (_lookAhead.TokenType == TokenType.Semicolon)
-            {
-                NextToken();
-            }
-            else { }
         }
 
         private void GenerateC3E(string leftValue, string opVal, string rightValue)
