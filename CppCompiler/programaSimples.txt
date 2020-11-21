@@ -1,4 +1,6 @@
 int main() {
+	int a,b,c;
+
 	a ^ b + c
 
 	a + b ^ c
@@ -17,7 +19,6 @@ int main() {
 
 	(x > y);
 
-	int a,b,c;
 	float d,e,f;
 
 	a+b;
