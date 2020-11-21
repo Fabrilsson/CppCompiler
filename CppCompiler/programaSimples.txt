@@ -1,21 +1,27 @@
 int main() {
-	int a,b,c;
+	a && b || c;
 
-	a ^ b + c
+	a + b * c;
 
-	a + b ^ c
+	a ^ b * c;
+
+	a ^ b + c;
 
 	(x + y) * (a - b) * (a + g);
 
 	(a/(k*(b+c)));
+
+	a/(k*(b+c));
+
+	int a,b,c;
+
+	a + b ^ c;
 
 	a = b;
 
 	j = x * y ^ z;
 
 	t = x <= (y + z);
-
-	a/(k*(b+c));
 
 	(x > y);
 
