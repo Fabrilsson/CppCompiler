@@ -1,4 +1,8 @@
 int main() {
+	a ^ b + c
+
+	a + b ^ c
+
 	(x + y) * (a - b) * (a + g);
 
 	(a/(k*(b+c)));
