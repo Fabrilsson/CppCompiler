@@ -37,81 +37,97 @@ namespace CppCompiler.Analysers
             Main();
 
             D();
+
+            var tempStack = new Stack<string>();
+
+            while (_c3eStack.Any())
+                tempStack.Push(_c3eStack.Pop());
+
+            _c3eStack = tempStack;
         }
 
         private void Main()
         {
             if (_lookAhead.TokenType.IsType())
-                NextToken();
+                MatchToken();
             else
                 throw new Exception();
 
             if (_lookAhead.TokenValue.Equals("MAIN", StringComparison.OrdinalIgnoreCase))
-                NextToken();
+                MatchToken();
             else
                 throw new Exception("Program does not contain a Main entrance method.");
 
             if (_lookAhead.TokenType == TokenType.LeftParenthesis)
-                NextToken();
+                MatchToken();
             else
                 throw new Exception();
 
             if (_lookAhead.TokenType == TokenType.RightParenthesis)
-                NextToken();
+                MatchToken();
             else
                 throw new Exception();
 
-            if (_lookAhead.TokenType == TokenType.LeftChaves)
-                NextToken();
+            if (_lookAhead.TokenType == TokenType.LeftBracers)
+                MatchToken();
             else
                 throw new Exception();
         }
 
         private void D()
         {
-            if(_lookAhead.TokenType == TokenType.WhileCommand)
+            if (_lookAhead.TokenType == TokenType.WhileCommand)
             {
                 _c3eStack.Push($"{_c3eLineCounter}. WHILE:");
                 _c3eLineCounter++;
                 MatchToken();
-                var leftValue = E();
+                var leftValue = E();//Entende expressões booleanas e matemáticas
                 _c3eStack.Push($"{_c3eLineCounter}. if {leftValue} == 0");
                 _c3eLineCounter++;
                 _c3eStack.Push($"{_c3eLineCounter}. goto 'END_WHILE:'");
                 _c3eLineCounter++;
-                D();
+                MatchToken(); //LeftBracers
+                D();//Depois pode ter qualquer coisa
                 _c3eStack.Push($"{_c3eLineCounter}. goto 'WHILE:'");
                 _c3eLineCounter++;
                 _c3eStack.Push($"{_c3eLineCounter}. END_WHILE:");
                 _c3eLineCounter++;
                 MatchToken();
+                D();//Depois pode ter qualquer coisa
             }
             else if (_lookAhead.TokenType == TokenType.IfCommand)
             {
-                MatchToken();
-                var leftValue = E();
+                MatchToken();//match if
+                var leftValue = E();//Entende expressões booleanas e matemáticas
                 _c3eStack.Push($"{_c3eLineCounter}. if {leftValue} == 0");
                 _c3eLineCounter++;
                 _c3eStack.Push($"{_c3eLineCounter}. goto 'ELSE:'");
                 _c3eLineCounter++;
-                D();
+                MatchToken(); //LeftBracers
+                D();//Depois pode ter qualquer coisa
                 //como saber se vai ter um else ou não?
-                MatchToken();
+                MatchToken();//RightBracers
+                MatchToken();//match else
                 _c3eStack.Push($"{_c3eLineCounter}. 'ELSE:'");
                 _c3eLineCounter++;
-                D();
-                MatchToken();
+                MatchToken(); //LeftBracers
+                D();//Depois pode ter qualquer coisa
+                MatchToken();//RightBracers     
+                D();//Depois pode ter qualquer coisa
             }
             else if (_lookAhead.TokenType.IsType())
             {
-                V();
+                V();//Entende os tipos
+                D();//Depois pode ter qualquer coisa
             }
-            else
+            else if(_lookAhead.TokenType != TokenType.RightBracers && 
+                _lookAhead.TokenType != TokenType.RightParenthesis && 
+                _lookAhead.TokenType != TokenType.RightBrackets)
             {
-                E();
+                E();//Entende expressões booleanas e matemáticas
+                MatchToken();
+                D();//Depois pode ter qualquer coisa
             }
-
-            D();
         }
 
         private void V()
@@ -172,7 +188,7 @@ namespace CppCompiler.Analysers
         {
             var leftValue = TT();
             leftValue = R(leftValue);
-            MatchToken();
+            //MatchToken();
 
             return leftValue;
         }
@@ -188,7 +204,7 @@ namespace CppCompiler.Analysers
                 _lookAhead.TokenType == TokenType.SubtractionOperator ||
                 _lookAhead.TokenType == TokenType.AssignmentOperator)
             {
-                DoThingy(leftValue is null ? newLeftValue.TokenValue : leftValue, () => TT());
+                DoThingy(leftValue is null ? newLeftValue.TokenValue : leftValue, () => E());
 
                 return R(null);
             }
@@ -215,7 +231,7 @@ namespace CppCompiler.Analysers
                 _lookAhead.TokenType == TokenType.DivisionOperator ||
                 _lookAhead.TokenType == TokenType.OrOperator)
             {
-                DoThingy(leftValue is null ? newLeftValue.TokenValue : leftValue, () => F());
+                DoThingy(leftValue is null ? newLeftValue.TokenValue : leftValue, () => TT());
 
                 return SS(null);
             }
@@ -242,7 +258,7 @@ namespace CppCompiler.Analysers
                 _lookAhead.TokenType == TokenType.AndOperator ||
                 _lookAhead.TokenType.IsComparisonOperator())
             {
-                DoThingy(leftValue is null ? newLeftValue.TokenValue : leftValue, () => G());
+                DoThingy(leftValue is null ? newLeftValue.TokenValue : leftValue, () => F());
 
                 return H(null);
             }

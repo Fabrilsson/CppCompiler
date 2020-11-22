@@ -55,12 +55,12 @@
         Colon,
         Semicolon,
         Comma,
-        LeftChaves,
-        RightChaves,
+        LeftBracers,
+        RightBracers,
         LeftParenthesis,
         RightParenthesis,
-        LeftColchete,
-        RightColchete,
+        LeftBrackets,
+        RightBrackets,
 
         // Types
         IntType,

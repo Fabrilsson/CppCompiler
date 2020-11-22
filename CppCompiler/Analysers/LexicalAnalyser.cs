@@ -37,8 +37,8 @@ namespace CppCompiler.Analysers
         {
             Dictionary<TokenType, string> patterns = new Dictionary<TokenType, string>();
 
-            patterns.Add(TokenType.LeftChaves, @"([{])");
-            patterns.Add(TokenType.RightChaves, @"([}])");
+            patterns.Add(TokenType.LeftBracers, @"([{])");
+            patterns.Add(TokenType.RightBracers, @"([}])");
             patterns.Add(TokenType.LongConstant, @"(\d+[l])");
             patterns.Add(TokenType.FloatingPointConstant, @"([-+]?[0-9]*\.?[0-9]*([.]|[E])[-+]?[0-9]*)");
             patterns.Add(TokenType.CharConstant, "('(.)')");
@@ -63,8 +63,8 @@ namespace CppCompiler.Analysers
             patterns.Add(TokenType.ModuleOperator, "([%])");
             patterns.Add(TokenType.DivisionOperator, @"([/])");
             patterns.Add(TokenType.Semicolon, @"([;])");
-            patterns.Add(TokenType.LeftColchete, @"([[])");
-            patterns.Add(TokenType.RightColchete, @"([]])");
+            patterns.Add(TokenType.LeftBrackets, @"([[])");
+            patterns.Add(TokenType.RightBrackets, @"([]])");
             patterns.Add(TokenType.Comma, @"([,])");
 
             List<Token> result = new List<Token>();

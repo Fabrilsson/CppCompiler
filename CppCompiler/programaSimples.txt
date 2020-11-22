@@ -1,7 +1,5 @@
 int main() {
 
-	num = num + cont2;
-
 	int cont, num;
 	float cont2; 
 	num = 0;
@@ -16,9 +14,9 @@ int main() {
 		}    
 		else
 		{
-		cont = 0;
+			cont = 0;
 		}
 
-		cont = cont + 1
+		cont = cont + 1;
 	}
 }
