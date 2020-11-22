@@ -69,11 +69,88 @@ namespace CppCompiler.Analysers
 
         private void D()
         {
-            if (_lookAhead.TokenType == TokenType.RightChaves)
-                return;
+            if(_lookAhead.TokenType == TokenType.WhileCommand)
+            {
+                _c3eStack.Push($"{_c3eLineCounter}. WHILE:");
+                _c3eLineCounter++;
+                MatchToken();
+                var leftValue = E();
+                _c3eStack.Push($"{_c3eLineCounter}. if {leftValue} == 0");
+                _c3eLineCounter++;
+                _c3eStack.Push($"{_c3eLineCounter}. goto 'END_WHILE:'");
+                _c3eLineCounter++;
+                D();
+                _c3eStack.Push($"{_c3eLineCounter}. goto 'WHILE:'");
+                _c3eLineCounter++;
+                _c3eStack.Push($"{_c3eLineCounter}. END_WHILE:");
+                _c3eLineCounter++;
+                MatchToken();
+            }
+            else if (_lookAhead.TokenType == TokenType.IfCommand)
+            {
+                MatchToken();
+                var leftValue = E();
+                _c3eStack.Push($"{_c3eLineCounter}. if {leftValue} == 0");
+                _c3eLineCounter++;
+                _c3eStack.Push($"{_c3eLineCounter}. goto 'ELSE:'");
+                _c3eLineCounter++;
+                D();
+                //como saber se vai ter um else ou não?
+                MatchToken();
+                _c3eStack.Push($"{_c3eLineCounter}. 'ELSE:'");
+                _c3eLineCounter++;
+                D();
+                MatchToken();
+            }
+            else if (_lookAhead.TokenType.IsType())
+            {
+                V();
+            }
+            else
+            {
+                E();
+            }
 
-            E();
             D();
+        }
+
+        private void V()
+        {
+            Y();
+        }
+
+        private void Y()
+        {
+            var typeVal = W();
+            var idVal = MatchToken();
+            X(typeVal);
+        }
+
+        private Token X(Token typeVal)
+        {
+            if (_lookAhead.TokenType == TokenType.Comma)
+            {
+                MatchToken();
+                var id = MatchToken();
+                X(typeVal);
+                return id;
+            }
+            else if (_lookAhead.TokenType == TokenType.Semicolon)
+            {
+                return MatchToken();
+            }
+
+            throw new NotImplementedException();
+        }
+
+        private Token W()
+        {
+            if (_lookAhead.TokenType.IsType())
+            {
+                return MatchToken();
+            }
+
+            throw new NotImplementedException();
         }
 
         private void DoThingy(string leftValue, Func<string> func)
@@ -91,11 +168,13 @@ namespace CppCompiler.Analysers
             GenerateC3E(leftValue, opVal, rightValue);
         }
 
-        private void E()
+        private string E()
         {
             var leftValue = TT();
-            R(leftValue);
+            leftValue = R(leftValue);
             MatchToken();
+
+            return leftValue;
         }
 
         private string R(string leftValue)
@@ -105,7 +184,9 @@ namespace CppCompiler.Analysers
             if (_temporaryVarStack.Any())
                 newLeftValue = _temporaryVarStack.Pop();
 
-            if (_lookAhead.TokenType == TokenType.AdditionOperator || _lookAhead.TokenType == TokenType.SubtractionOperator)
+            if (_lookAhead.TokenType == TokenType.AdditionOperator || 
+                _lookAhead.TokenType == TokenType.SubtractionOperator ||
+                _lookAhead.TokenType == TokenType.AssignmentOperator)
             {
                 DoThingy(leftValue is null ? newLeftValue.TokenValue : leftValue, () => TT());
 
@@ -157,13 +238,9 @@ namespace CppCompiler.Analysers
             if (_temporaryVarStack.Any())
                 newLeftValue = _temporaryVarStack.Pop();
 
-            if (_lookAhead.TokenType == TokenType.PowOperator)
-            {
-                DoThingy(leftValue is null ? newLeftValue.TokenValue : leftValue, () => G());
-
-                return H(null);
-            }
-            else if (_lookAhead.TokenType == TokenType.AndOperator)
+            if (_lookAhead.TokenType == TokenType.PowOperator ||
+                _lookAhead.TokenType == TokenType.AndOperator ||
+                _lookAhead.TokenType.IsComparisonOperator())
             {
                 DoThingy(leftValue is null ? newLeftValue.TokenValue : leftValue, () => G());
 
@@ -193,7 +270,7 @@ namespace CppCompiler.Analysers
                 return MatchToken().TokenValue;
             }
 
-            return null;
+            throw new NotImplementedException();
         }
 
         private Token MatchToken()
@@ -214,11 +291,14 @@ namespace CppCompiler.Analysers
             {
                 _c3eStack.Push($"{_c3eLineCounter}. if {leftValue} {opVal.TokenValue.Invert()} {rightValue}");
                 _c3eLineCounter++;
+                _c3eStack.Push($"{_c3eLineCounter}. goto {_c3eLineCounter + 3}");
+                _c3eLineCounter++;
+                _c3eStack.Push($"{_c3eLineCounter}. T{_temporaryVarCounter} = 1");
+                _c3eLineCounter++;
                 _c3eStack.Push($"{_c3eLineCounter}. goto {_c3eLineCounter + 2}");
                 _c3eLineCounter++;
                 _c3eStack.Push($"{_c3eLineCounter}. T{_temporaryVarCounter} = 0");
                 _c3eLineCounter++;
-                _c3eStack.Push($"{_c3eLineCounter}. T{_temporaryVarCounter} = 1");
                 _temporaryVarStack.Push(new Token(TokenType.BooleanConstant, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
@@ -226,23 +306,27 @@ namespace CppCompiler.Analysers
             {
                 _c3eStack.Push($"{_c3eLineCounter}. if {leftValue} {opVal.TokenValue} {rightValue}");
                 _c3eLineCounter++;
-                _c3eStack.Push($"{_c3eLineCounter}. goto {_c3eLineCounter + 2}");
+                _c3eStack.Push($"{_c3eLineCounter}. goto {_c3eLineCounter + 3}");
                 _c3eLineCounter++;
                 _c3eStack.Push($"{_c3eLineCounter}. T{_temporaryVarCounter} = 0");
                 _c3eLineCounter++;
+                _c3eStack.Push($"{_c3eLineCounter}. goto {_c3eLineCounter + 2}");
+                _c3eLineCounter++;
                 _c3eStack.Push($"{_c3eLineCounter}. T{_temporaryVarCounter} = 1");
+                _c3eLineCounter++;
                 _temporaryVarStack.Push(new Token(TokenType.BooleanConstant, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
             else if (opVal.TokenType != TokenType.AssignmentOperator)
             {
                 _c3eStack.Push($"{_c3eLineCounter}. T{_temporaryVarCounter} = {leftValue} {opVal.TokenValue} {rightValue}");
+                _c3eLineCounter++;
                 _temporaryVarStack.Push(new Token(TokenType.Undefined, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
             else
             {
-                _c3eStack.Push($"{leftValue} {opVal} {rightValue}");
+                _c3eStack.Push($"{leftValue} {opVal.TokenValue} {rightValue}");
             }
         }
     }

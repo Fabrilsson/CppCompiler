@@ -1,33 +1,24 @@
 int main() {
-	a + b + c + d;
 
-	a && b || c;
+	num = num + cont2;
 
-	a + b * c;
+	int cont, num;
+	float cont2; 
+	num = 0;
+	
+	while(cont < 10)
+	{
+		cont2 = 3.1415 * contador ^ 2;
 
-	a ^ b * c;
+		if(cont < 5)
+		{
+			num = num + cont2;
+		}    
+		else
+		{
+		cont = 0;
+		}
 
-	a ^ b + c;
-
-	(x + y) * (a - b) * (a + g);
-
-	(a/(k*(b+c)));
-
-	a/(k*(b+c));
-
-	int a,b,c;
-
-	a + b ^ c;
-
-	a = b;
-
-	j = x * y ^ z;
-
-	t = x <= (y + z);
-
-	(x > y);
-
-	float d,e,f;
-
-	a+b;
+		cont = cont + 1
+	}
 }
