@@ -42,7 +42,7 @@
                 tokenType == TokenType.SubtractionOperator;
         }
 
-        internal static bool IsBooleanOperator(this TokenType tokenType)
+        internal static bool IsComparisonOperator(this TokenType tokenType)
         {
             return tokenType == TokenType.LessThanOperator ||
                 tokenType == TokenType.LessThanOrEqualToOperator ||
@@ -50,6 +50,12 @@
                 tokenType == TokenType.GreaterThanOrEqualToOperator ||
                 tokenType == TokenType.NotEqualToOperator ||
                 tokenType == TokenType.EqualToOperator;
+        }
+
+        internal static bool IsLogicOperator(this TokenType tokenType)
+        {
+            return tokenType == TokenType.AndOperator ||
+                tokenType == TokenType.OrOperator;
         }
 
         internal static bool IsNumber(this TokenType tokenType)

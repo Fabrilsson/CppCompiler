@@ -1,12 +1,17 @@
 ﻿namespace CppCompiler
 {
-    class Token
+    internal class Token
     {
-        public TokenType TokenType { get; set; }
+        internal TokenType TokenType { get; set; }
 
-        public string TokenValue { get; set; }
+        internal string TokenValue { get; set; }
 
-        public Token(TokenType tokenType, string tokenValue)
+        internal Token()
+        {
+
+        }
+
+        internal Token(TokenType tokenType, string tokenValue)
         {
             TokenType = tokenType;
             TokenValue = tokenValue;
