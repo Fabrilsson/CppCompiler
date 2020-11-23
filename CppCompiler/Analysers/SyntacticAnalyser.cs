@@ -107,12 +107,17 @@ namespace CppCompiler.Analysers
                 D();//Depois pode ter qualquer coisa
                 //como saber se vai ter um else ou não?
                 MatchToken();//RightBracers
-                MatchToken();//match else
-                _c3eStack.Push($"{_c3eLineCounter}. 'ELSE:'");
-                _c3eLineCounter++;
-                MatchToken(); //LeftBracers
-                D();//Depois pode ter qualquer coisa
-                MatchToken();//RightBracers     
+
+                if (_lookAhead.TokenType == TokenType.ElseCommand)
+                {
+                    MatchToken();//match else
+                    _c3eStack.Push($"{_c3eLineCounter}. 'ELSE:'");
+                    _c3eLineCounter++;
+                    MatchToken(); //LeftBracers
+                    D();//Depois pode ter qualquer coisa
+                    MatchToken();//RightBracers     
+                }
+
                 D();//Depois pode ter qualquer coisa
             }
             else if (_lookAhead.TokenType.IsType())
