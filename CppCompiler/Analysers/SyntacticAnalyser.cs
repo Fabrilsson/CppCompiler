@@ -13,6 +13,8 @@ namespace CppCompiler.Analysers
 
         private List<SyntaticAnalyserResult> _syntaticAnalyserResults;
 
+        private Stack<Token> _varStack;
+
         private Stack<Token> _temporaryVarStack;
 
         private Stack<string> _c3eStack;
@@ -26,6 +28,7 @@ namespace CppCompiler.Analysers
             _tokens = tokens;
             _lookAhead = tokens.FirstOrDefault();
             _syntaticAnalyserResults = new List<SyntaticAnalyserResult>();
+            _varStack = new Stack<Token>();
             _temporaryVarStack = new Stack<Token>();
             _c3eStack = new Stack<string>();
             _temporaryVarCounter = 0;
@@ -145,6 +148,7 @@ namespace CppCompiler.Analysers
         {
             var typeVal = W();
             var idVal = MatchToken();
+            _varStack.Push(idVal);
             X(typeVal);
         }
 
@@ -154,6 +158,7 @@ namespace CppCompiler.Analysers
             {
                 MatchToken();
                 var id = MatchToken();
+                _varStack.Push(id);
                 X(typeVal);
                 return id;
             }
