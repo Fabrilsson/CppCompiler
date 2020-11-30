@@ -108,11 +108,12 @@ namespace CppCompiler.Analysers
                 //como saber se vai ter um else ou não?
                 MatchToken();//RightBracers
 
+                _c3eStack.Push($"{_c3eLineCounter}. 'ELSE:'");
+                _c3eLineCounter++;
+
                 if (_lookAhead.TokenType == TokenType.ElseCommand)
                 {
                     MatchToken();//match else
-                    _c3eStack.Push($"{_c3eLineCounter}. 'ELSE:'");
-                    _c3eLineCounter++;
                     MatchToken(); //LeftBracers
                     D();//Depois pode ter qualquer coisa
                     MatchToken();//RightBracers     
@@ -347,7 +348,8 @@ namespace CppCompiler.Analysers
             }
             else
             {
-                _c3eStack.Push($"{leftValue} {opVal.TokenValue} {rightValue}");
+                _c3eStack.Push($"{_c3eLineCounter}. {leftValue} {opVal.TokenValue} {rightValue}");
+                _c3eLineCounter++;
             }
         }
     }
