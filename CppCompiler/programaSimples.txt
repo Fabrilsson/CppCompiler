@@ -1,6 +1,6 @@
 int main() {
 
-	int cont, num;
+	int cont, num, contador;
 	float cont2; 
 	num = 0;
 	

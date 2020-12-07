@@ -294,7 +294,12 @@ namespace CppCompiler.Analysers
             }
             else if (_lookAhead.TokenType == TokenType.Identifier)
             {
-                return MatchToken().TokenValue;
+                var id = MatchToken().TokenValue;
+
+                if (!_varStack.Any(v => v.TokenValue == id))
+                    throw new NotImplementedException();
+
+                return id;
             }
 
             throw new NotImplementedException();
