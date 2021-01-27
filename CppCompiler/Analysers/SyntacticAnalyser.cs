@@ -1,4 +1,6 @@
-﻿using CppCompiler.Extensions;
+﻿using CppCompiler.Entities;
+using CppCompiler.Enums;
+using CppCompiler.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,6 +81,28 @@ namespace CppCompiler.Analysers
 
         private void D()
         {
+            While();
+
+            If();
+
+            if (_lookAhead.TokenType.IsType())
+            {
+                V();//Entende os tipos
+                D();//Depois pode ter qualquer coisa
+            }
+
+            if (_lookAhead.TokenType != TokenType.RightBracers &&
+                _lookAhead.TokenType != TokenType.RightParenthesis &&
+                _lookAhead.TokenType != TokenType.RightBrackets)
+            {
+                E();//Entende expressões booleanas e matemáticas
+                MatchToken();
+                D();//Depois pode ter qualquer coisa
+            }
+        }
+
+        private void While()
+        {
             if (_lookAhead.TokenType == TokenType.WhileCommand)
             {
                 _c3eStack.Push($"{_c3eLineCounter}. WHILE:");
@@ -98,7 +122,11 @@ namespace CppCompiler.Analysers
                 MatchToken();
                 D();//Depois pode ter qualquer coisa
             }
-            else if (_lookAhead.TokenType == TokenType.IfCommand)
+        }
+
+        private void If()
+        {
+            if (_lookAhead.TokenType == TokenType.IfCommand)
             {
                 MatchToken();//match if
                 var leftValue = E();//Entende expressões booleanas e matemáticas
@@ -108,34 +136,26 @@ namespace CppCompiler.Analysers
                 _c3eLineCounter++;
                 MatchToken(); //LeftBracers
                 D();//Depois pode ter qualquer coisa
-                //como saber se vai ter um else ou não?
+                    //como saber se vai ter um else ou não?
                 MatchToken();//RightBracers
 
                 _c3eStack.Push($"{_c3eLineCounter}. 'ELSE:'");
                 _c3eLineCounter++;
 
-                if (_lookAhead.TokenType == TokenType.ElseCommand)
-                {
-                    MatchToken();//match else
-                    MatchToken(); //LeftBracers
-                    D();//Depois pode ter qualquer coisa
-                    MatchToken();//RightBracers     
-                }
+                Else();
 
                 D();//Depois pode ter qualquer coisa
             }
-            else if (_lookAhead.TokenType.IsType())
+        }
+
+        private void Else()
+        {
+            if (_lookAhead.TokenType == TokenType.ElseCommand)
             {
-                V();//Entende os tipos
+                MatchToken();//match else
+                MatchToken(); //LeftBracers
                 D();//Depois pode ter qualquer coisa
-            }
-            else if(_lookAhead.TokenType != TokenType.RightBracers && 
-                _lookAhead.TokenType != TokenType.RightParenthesis && 
-                _lookAhead.TokenType != TokenType.RightBrackets)
-            {
-                E();//Entende expressões booleanas e matemáticas
-                MatchToken();
-                D();//Depois pode ter qualquer coisa
+                MatchToken();//RightBracers     
             }
         }
 

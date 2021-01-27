@@ -1,4 +1,4 @@
-﻿namespace CppCompiler
+﻿namespace CppCompiler.Enums
 {
     enum TokenType
     {

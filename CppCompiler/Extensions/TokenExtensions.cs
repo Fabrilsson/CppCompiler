@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using CppCompiler.Entities;
+using System.Collections.Generic;
 
 namespace CppCompiler.Extensions
 {

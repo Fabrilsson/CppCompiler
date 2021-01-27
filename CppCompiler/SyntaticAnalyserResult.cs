@@ -1,4 +1,6 @@
-﻿namespace CppCompiler
+﻿using CppCompiler.Enums;
+
+namespace CppCompiler
 {
     internal class SyntaticAnalyserResult
     {

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CppCompiler.Entities;
+using CppCompiler.Enums;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 

@@ -1,4 +1,6 @@
-﻿namespace CppCompiler.Extensions
+﻿using CppCompiler.Enums;
+
+namespace CppCompiler.Extensions
 {
     internal static class TokenTypeExtensions
     {
