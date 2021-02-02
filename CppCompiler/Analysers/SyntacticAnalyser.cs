@@ -40,7 +40,7 @@ namespace CppCompiler.Analysers
             _c3eLineCounter = 0;
         }
 
-        internal void Execute()
+        internal SyntaticAnalyserResult Execute()
         {
             Main();
 
@@ -55,6 +55,8 @@ namespace CppCompiler.Analysers
 
             _syntaticAnalyserResult.C3EList = _c3eAnalyserResults;
             _syntaticAnalyserResult.VarStack = _varStack.ToList();
+
+            return _syntaticAnalyserResult;
         }
 
         private void Main()
@@ -226,6 +228,9 @@ namespace CppCompiler.Analysers
         {
             var typeVal = W();
             var idVal = MatchToken();
+
+            idVal.TokenType = typeVal.TokenType;
+
             _varStack.Push(idVal);
             X(typeVal);
         }
@@ -236,6 +241,9 @@ namespace CppCompiler.Analysers
             {
                 MatchToken();
                 var id = MatchToken();
+
+                id.TokenType = typeVal.TokenType;
+
                 _varStack.Push(id);
                 X(typeVal);
                 return id;

@@ -1,4 +1,5 @@
 ﻿using CppCompiler.Analysers;
+using CppCompiler.Generators;
 using System;
 using System.IO;
 using System.Linq;
@@ -17,7 +18,11 @@ namespace CppCompiler
 
             var syntaticAnalyser = new SyntacticAnalyser(tokens.ToList());
 
-            syntaticAnalyser.Execute();
+            var result = syntaticAnalyser.Execute();
+
+            var assemblyGenerator = new AssemblyGenerator(result);
+
+            assemblyGenerator.Generate();
 
             foreach (var token in tokens)
             {
