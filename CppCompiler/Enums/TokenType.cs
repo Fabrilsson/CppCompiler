@@ -16,6 +16,8 @@
         BreakCommand,
         ContinueCommand,
         ReturnCommand,
+        GotoCommand,
+        Label,
         
         // Boolean Operators
         AndOperator,

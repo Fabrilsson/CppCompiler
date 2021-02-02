@@ -13,7 +13,9 @@ namespace CppCompiler.Analysers
 
         private Token _lookAhead;
 
-        private List<SyntaticAnalyserResult> _syntaticAnalyserResults;
+        private List<C3EAnalyserResult> _c3eAnalyserResults;
+
+        private SyntaticAnalyserResult _syntaticAnalyserResult;
 
         private Stack<Token> _varStack;
 
@@ -29,7 +31,8 @@ namespace CppCompiler.Analysers
         {
             _tokens = tokens;
             _lookAhead = tokens.FirstOrDefault();
-            _syntaticAnalyserResults = new List<SyntaticAnalyserResult>();
+            _c3eAnalyserResults = new List<C3EAnalyserResult>();
+            _syntaticAnalyserResult = new SyntaticAnalyserResult();
             _varStack = new Stack<Token>();
             _temporaryVarStack = new Stack<Token>();
             _c3eStack = new Stack<string>();
@@ -49,6 +52,9 @@ namespace CppCompiler.Analysers
                 tempStack.Push(_c3eStack.Pop());
 
             _c3eStack = tempStack;
+
+            _syntaticAnalyserResult.C3EList = _c3eAnalyserResults;
+            _syntaticAnalyserResult.VarStack = _varStack.ToList();
         }
 
         private void Main()
@@ -105,20 +111,54 @@ namespace CppCompiler.Analysers
         {
             if (_lookAhead.TokenType == TokenType.WhileCommand)
             {
-                _c3eStack.Push($"{_c3eLineCounter}. WHILE:");
-                _c3eLineCounter++;
+                GenerateC3E(
+                    $"{_c3eLineCounter}. WHILE:",
+                    new Token(TokenType.Label, "WHILE:"),
+                    null,
+                    null,
+                    null,
+                    null);
+
                 MatchToken();
+
                 var leftValue = E();//Entende expressões booleanas e matemáticas
-                _c3eStack.Push($"{_c3eLineCounter}. if {leftValue} == 0");
-                _c3eLineCounter++;
-                _c3eStack.Push($"{_c3eLineCounter}. goto 'END_WHILE:'");
-                _c3eLineCounter++;
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. if {leftValue.TokenValue} == 0",
+                    new Token(TokenType.IfCommand, "if"),
+                    null,
+                    leftValue,
+                    new Token(TokenType.EqualToOperator, "=="),
+                    new Token(TokenType.IntegerConstant, "0"));
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. goto 'END_WHILE:'",
+                    new Token(TokenType.GotoCommand, "goto"),
+                    new Token(TokenType.Label, "END_WHILE:"),
+                    null,
+                    null,
+                    null);
+
                 MatchToken(); //LeftBracers
+
                 D();//Depois pode ter qualquer coisa
-                _c3eStack.Push($"{_c3eLineCounter}. goto 'WHILE:'");
-                _c3eLineCounter++;
-                _c3eStack.Push($"{_c3eLineCounter}. END_WHILE:");
-                _c3eLineCounter++;
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. goto 'WHILE:'",
+                    new Token(TokenType.GotoCommand, "goto"),
+                    new Token(TokenType.Label, "WHILE:"),
+                    null,
+                    null,
+                    null);
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. 'END_WHILE:'",
+                    new Token(TokenType.Label, "END_WHILE:"),
+                    null,
+                    null,
+                    null,
+                    null);
+
                 MatchToken();
                 D();//Depois pode ter qualquer coisa
             }
@@ -130,17 +170,35 @@ namespace CppCompiler.Analysers
             {
                 MatchToken();//match if
                 var leftValue = E();//Entende expressões booleanas e matemáticas
-                _c3eStack.Push($"{_c3eLineCounter}. if {leftValue} == 0");
-                _c3eLineCounter++;
-                _c3eStack.Push($"{_c3eLineCounter}. goto 'ELSE:'");
-                _c3eLineCounter++;
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. if {leftValue.TokenValue} == 0",
+                    new Token(TokenType.IfCommand, "if"),
+                    null,
+                    leftValue,
+                    new Token(TokenType.EqualToOperator, "=="),
+                    new Token(TokenType.IntegerConstant, "0"));
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. goto 'ELSE:'",
+                    new Token(TokenType.GotoCommand, "goto"),
+                    new Token(TokenType.Label, "ELSE:"),
+                    null,
+                    null,
+                    null);
+
                 MatchToken(); //LeftBracers
                 D();//Depois pode ter qualquer coisa
                     //como saber se vai ter um else ou não?
                 MatchToken();//RightBracers
 
-                _c3eStack.Push($"{_c3eLineCounter}. 'ELSE:'");
-                _c3eLineCounter++;
+                GenerateC3E(
+                    $"{_c3eLineCounter}. 'ELSE:'",
+                    new Token(TokenType.Label, "ELSE:"),
+                    null,
+                    null,
+                    null,
+                    null);
 
                 Else();
 
@@ -200,22 +258,15 @@ namespace CppCompiler.Analysers
             throw new NotImplementedException();
         }
 
-        private void DoThingy(string leftValue, Func<string> func)
+        private void DoThingy(Token leftValue, Func<Token> func)
         {
             var opVal = MatchToken();
             var rightValue = func();
 
-            _syntaticAnalyserResults.Add(new SyntaticAnalyserResult
-            {
-                Operator = opVal.TokenValue,
-                LeftValue = leftValue,
-                RightValue = rightValue
-            });
-
             GenerateC3E(leftValue, opVal, rightValue);
         }
 
-        private string E()
+        private Token E()
         {
             var leftValue = TT();
             leftValue = R(leftValue);
@@ -224,7 +275,7 @@ namespace CppCompiler.Analysers
             return leftValue;
         }
 
-        private string R(string leftValue)
+        private Token R(Token leftValue)
         {
             Token newLeftValue = new Token();
 
@@ -235,15 +286,15 @@ namespace CppCompiler.Analysers
                 _lookAhead.TokenType == TokenType.SubtractionOperator ||
                 _lookAhead.TokenType == TokenType.AssignmentOperator)
             {
-                DoThingy(leftValue is null ? newLeftValue.TokenValue : leftValue, () => E());
+                DoThingy(leftValue.TokenValue is null ? newLeftValue : leftValue, () => E());
 
                 return R(null);
             }
 
-            return newLeftValue.TokenValue is null ? leftValue : newLeftValue.TokenValue;
+            return newLeftValue.TokenValue is null ? leftValue : newLeftValue;
         }
 
-        private string TT()
+        private Token TT()
         {
             var leftValue = F();
             leftValue = SS(leftValue);
@@ -251,7 +302,7 @@ namespace CppCompiler.Analysers
             return leftValue;
         }
 
-        private string SS(string leftValue)
+        private Token SS(Token leftValue)
         {
             Token newLeftValue = new Token();
 
@@ -262,15 +313,15 @@ namespace CppCompiler.Analysers
                 _lookAhead.TokenType == TokenType.DivisionOperator ||
                 _lookAhead.TokenType == TokenType.OrOperator)
             {
-                DoThingy(leftValue is null ? newLeftValue.TokenValue : leftValue, () => TT());
+                DoThingy(leftValue.TokenValue is null ? newLeftValue : leftValue, () => TT());
 
                 return SS(null);
             }
 
-            return newLeftValue.TokenValue is null ? leftValue : newLeftValue.TokenValue;
+            return newLeftValue.TokenValue is null ? leftValue : newLeftValue;
         }
 
-        private string F()
+        private Token F()
         {
             var leftValue = G();
             leftValue = H(leftValue);
@@ -278,7 +329,7 @@ namespace CppCompiler.Analysers
             return leftValue;
         }
 
-        private string H(string leftValue)
+        private Token H(Token leftValue)
         {
             Token newLeftValue = new Token();
 
@@ -289,15 +340,15 @@ namespace CppCompiler.Analysers
                 _lookAhead.TokenType == TokenType.AndOperator ||
                 _lookAhead.TokenType.IsComparisonOperator())
             {
-                DoThingy(leftValue is null ? newLeftValue.TokenValue : leftValue, () => F());
+                DoThingy(leftValue.TokenValue is null ? newLeftValue : leftValue, () => F());
 
                 return H(null);
             }
 
-            return newLeftValue.TokenValue is null ? leftValue : newLeftValue.TokenValue;
+            return newLeftValue.TokenValue is null ? leftValue : newLeftValue;
         }
 
-        private string G()
+        private Token G()
         {
             if(_lookAhead.TokenType == TokenType.LeftParenthesis)
             {
@@ -310,13 +361,13 @@ namespace CppCompiler.Analysers
             }
             else if (_lookAhead.TokenType.IsNumber())
             {
-                return MatchToken().TokenValue;
+                return MatchToken();
             }
             else if (_lookAhead.TokenType == TokenType.Identifier)
             {
-                var id = MatchToken().TokenValue;
+                var id = MatchToken();
 
-                if (!_varStack.Any(v => v.TokenValue == id))
+                if (!_varStack.Any(v => v.TokenValue == id.TokenValue))
                     throw new NotImplementedException();
 
                 return id;
@@ -337,50 +388,131 @@ namespace CppCompiler.Analysers
             _lookAhead = _lookAhead.Next(_tokens);
         }
 
-        private void GenerateC3E(string leftValue, Token opVal, string rightValue)
+        private void GenerateC3E(Token leftValue, Token opVal, Token rightValue)
         {
             if (opVal.TokenType.IsComparisonOperator())
             {
-                _c3eStack.Push($"{_c3eLineCounter}. if {leftValue} {opVal.TokenValue.Invert()} {rightValue}");
-                _c3eLineCounter++;
-                _c3eStack.Push($"{_c3eLineCounter}. goto {_c3eLineCounter + 3}");
-                _c3eLineCounter++;
-                _c3eStack.Push($"{_c3eLineCounter}. T{_temporaryVarCounter} = 1");
-                _c3eLineCounter++;
-                _c3eStack.Push($"{_c3eLineCounter}. goto {_c3eLineCounter + 2}");
-                _c3eLineCounter++;
-                _c3eStack.Push($"{_c3eLineCounter}. T{_temporaryVarCounter} = 0");
-                _c3eLineCounter++;
+                GenerateC3E(
+                    $"{_c3eLineCounter}. if {leftValue.TokenValue} {opVal.TokenValue.Invert()} {rightValue.TokenValue}",
+                    new Token(TokenType.IfCommand, "if"),
+                    null,
+                    leftValue,
+                    opVal,
+                    rightValue);
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. goto {_c3eLineCounter + 3}",
+                    new Token(TokenType.GotoCommand, "goto"),
+                    new Token(TokenType.Label, $"{_c3eLineCounter + 3}"));
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. T{_temporaryVarCounter} = 1",
+                    null,
+                    null,
+                    new Token(TokenType.Identifier, $"T{_temporaryVarCounter}"),
+                    new Token(TokenType.AssignmentOperator, "="),
+                    new Token(TokenType.IntegerConstant, "1"));
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. goto {_c3eLineCounter + 2}",
+                    new Token(TokenType.GotoCommand, "goto"),
+                    new Token(TokenType.Label, $"{_c3eLineCounter + 2}"));
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. T{_temporaryVarCounter} = 0",
+                    null,
+                    null,
+                    new Token(TokenType.Identifier, $"T{_temporaryVarCounter}"),
+                    new Token(TokenType.AssignmentOperator, "="),
+                    new Token(TokenType.IntegerConstant, "0"));
+
                 _temporaryVarStack.Push(new Token(TokenType.BooleanConstant, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
             else if (opVal.TokenType.IsLogicOperator())
             {
-                _c3eStack.Push($"{_c3eLineCounter}. if {leftValue} {opVal.TokenValue} {rightValue}");
-                _c3eLineCounter++;
-                _c3eStack.Push($"{_c3eLineCounter}. goto {_c3eLineCounter + 3}");
-                _c3eLineCounter++;
-                _c3eStack.Push($"{_c3eLineCounter}. T{_temporaryVarCounter} = 0");
-                _c3eLineCounter++;
-                _c3eStack.Push($"{_c3eLineCounter}. goto {_c3eLineCounter + 2}");
-                _c3eLineCounter++;
-                _c3eStack.Push($"{_c3eLineCounter}. T{_temporaryVarCounter} = 1");
-                _c3eLineCounter++;
+                GenerateC3E(
+                    $"{_c3eLineCounter}. if {leftValue.TokenValue} {opVal.TokenValue} {rightValue.TokenValue}",
+                    new Token(TokenType.IfCommand, "if"),
+                    null,
+                    leftValue,
+                    opVal,
+                    rightValue);
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. goto {_c3eLineCounter + 3}",
+                    new Token(TokenType.GotoCommand, "goto"),
+                    new Token(TokenType.Label, $"{_c3eLineCounter + 3}"));
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. T{_temporaryVarCounter} = 0",
+                    null,
+                    null,
+                    new Token(TokenType.Identifier, $"T{_temporaryVarCounter}"),
+                    new Token(TokenType.AssignmentOperator, "="),
+                    new Token(TokenType.IntegerConstant, "1"));
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. goto {_c3eLineCounter + 2}",
+                    new Token(TokenType.GotoCommand, "goto"),
+                    new Token(TokenType.Label, $"{_c3eLineCounter + 2}"));
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. T{_temporaryVarCounter} = 1",
+                    null,
+                    null,
+                    new Token(TokenType.Identifier, $"T{_temporaryVarCounter}"),
+                    new Token(TokenType.AssignmentOperator, "="),
+                    new Token(TokenType.IntegerConstant, "0"));
+
                 _temporaryVarStack.Push(new Token(TokenType.BooleanConstant, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
             else if (opVal.TokenType != TokenType.AssignmentOperator)
             {
-                _c3eStack.Push($"{_c3eLineCounter}. T{_temporaryVarCounter} = {leftValue} {opVal.TokenValue} {rightValue}");
-                _c3eLineCounter++;
+                GenerateC3E(
+                    $"{_c3eLineCounter}. T{_temporaryVarCounter} = {leftValue.TokenValue} {opVal.TokenValue} {rightValue.TokenValue}",
+                    new Token(TokenType.AssignmentOperator, "="),
+                    new Token(TokenType.Identifier, $"T{_temporaryVarCounter}"),
+                    leftValue,
+                    opVal,
+                    rightValue);
+
                 _temporaryVarStack.Push(new Token(TokenType.Undefined, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
             else
             {
-                _c3eStack.Push($"{_c3eLineCounter}. {leftValue} {opVal.TokenValue} {rightValue}");
-                _c3eLineCounter++;
+                GenerateC3E(
+                    $"{_c3eLineCounter}. {leftValue.TokenValue} {opVal.TokenValue} {rightValue.TokenValue}",
+                    null,
+                    null,
+                    leftValue,
+                    opVal,
+                    rightValue);
             }
+        }
+
+        private void GenerateC3E(
+            string c3eValue = null,
+            Token leftMostOperator = null,
+            Token leftMostValue = null,
+            Token leftValue = null,
+            Token op = null,
+            Token rightValue = null)
+        {
+            _c3eStack.Push(c3eValue);
+
+            _c3eAnalyserResults.Add(new C3EAnalyserResult
+            {
+                LeftMostOperator = leftMostOperator,
+                LeftMostValue = leftMostValue,
+                LeftValue = leftValue,
+                Operator = op,
+                RightValue = rightValue
+            });
+
+            _c3eLineCounter++;
         }
     }
 }

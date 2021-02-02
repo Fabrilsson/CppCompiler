@@ -49,6 +49,7 @@
     <Compile Include="Extensions\TokenExtensions.cs" />
     <Compile Include="Extensions\TokenTypeExtensions.cs" />
     <Compile Include="Extensions\TokenValueExtensions.cs" />
+    <Compile Include="Generators\AssemblyGenerator.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Entities\SyntaticAnalyserResult.cs" />
@@ -62,5 +63,6 @@
     <Content Include="programaSimples.txt" />
     <Content Include="programa.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
