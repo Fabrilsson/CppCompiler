@@ -43,9 +43,17 @@ namespace CppCompiler.Generators
                         stringList.Add($"add edx, 30h");
                         stringList.Add($"mov [{item.LeftValue.TokenValue}], edx");
                     }
-                    else
+                    else if(item.LeftValue?.TokenType == TokenType.TempVariable)
                     {
-
+                        stringList.Add($"mov edx, {item.RightValue.TokenValue}h");
+                        stringList.Add($"add edx, 30h");
+                        stringList.Add($"mov ebx, edx");
+                    }
+                    else if (item.RightValue?.TokenType == TokenType.TempVariable)
+                    {
+                        stringList.Add($"mov edx, ebx");
+                        stringList.Add($"add edx, 30h");
+                        stringList.Add($"mov [{item.LeftValue.TokenValue}], edx");
                     }
                 }
 

@@ -2,7 +2,7 @@ int main() {
 
 	int cont, num, contador;
 	float cont2; 
-	num = 5;
+	num = 0;
 	
 	while(cont < 10)
 	{

@@ -20,7 +20,7 @@ call _GetStdHandle@4
 mov ebx, eax
 
 
-mov edx, 5h
+mov edx, 0h
 add edx, 30h
 mov [num], edx
 WHILE:
@@ -28,13 +28,31 @@ mov edx, cont
 mov eax, 10
 cmp edx, eax
 jae END_WHILE
+mov edx, 1h
+add edx, 30h
+mov ebx, edx
+mov edx, 0h
+add edx, 30h
+mov ebx, edx
+mov edx, ebx
+add edx, 30h
+mov [cont2], edx
 mov edx, cont
 mov eax, 5
 cmp edx, eax
 jae END_WHILE
+mov edx, 1h
+add edx, 30h
+mov ebx, edx
+mov edx, 0h
+add edx, 30h
+mov ebx, edx
 mov edx, num
 add edx, cont2
 mov [T4], edx
+mov edx, ebx
+add edx, 30h
+mov [num], edx
 ELSE:
 mov edx, 0h
 add edx, 30h
@@ -42,6 +60,9 @@ mov [cont], edx
 mov edx, cont
 add edx, 1
 mov [T5], edx
+mov edx, ebx
+add edx, 30h
+mov [cont], edx
 END_WHILE:
 push 0
 lea eax, [ebp-4]
