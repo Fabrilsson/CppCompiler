@@ -417,7 +417,7 @@ namespace CppCompiler.Analysers
                     $"{_c3eLineCounter}. T{_temporaryVarCounter} = 1",
                     null,
                     null,
-                    new Token(TokenType.Identifier, $"T{_temporaryVarCounter}"),
+                    new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"),
                     new Token(TokenType.AssignmentOperator, "="),
                     new Token(TokenType.IntegerConstant, "1"));
 
@@ -430,11 +430,11 @@ namespace CppCompiler.Analysers
                     $"{_c3eLineCounter}. T{_temporaryVarCounter} = 0",
                     null,
                     null,
-                    new Token(TokenType.Identifier, $"T{_temporaryVarCounter}"),
+                    new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"),
                     new Token(TokenType.AssignmentOperator, "="),
                     new Token(TokenType.IntegerConstant, "0"));
 
-                _temporaryVarStack.Push(new Token(TokenType.BooleanConstant, $"T{_temporaryVarCounter}"));
+                _temporaryVarStack.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
             else if (opVal.TokenType.IsLogicOperator())
@@ -456,7 +456,7 @@ namespace CppCompiler.Analysers
                     $"{_c3eLineCounter}. T{_temporaryVarCounter} = 0",
                     null,
                     null,
-                    new Token(TokenType.Identifier, $"T{_temporaryVarCounter}"),
+                    new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"),
                     new Token(TokenType.AssignmentOperator, "="),
                     new Token(TokenType.IntegerConstant, "1"));
 
@@ -469,11 +469,11 @@ namespace CppCompiler.Analysers
                     $"{_c3eLineCounter}. T{_temporaryVarCounter} = 1",
                     null,
                     null,
-                    new Token(TokenType.Identifier, $"T{_temporaryVarCounter}"),
+                    new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"),
                     new Token(TokenType.AssignmentOperator, "="),
                     new Token(TokenType.IntegerConstant, "0"));
 
-                _temporaryVarStack.Push(new Token(TokenType.BooleanConstant, $"T{_temporaryVarCounter}"));
+                _temporaryVarStack.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
             else if (opVal.TokenType != TokenType.AssignmentOperator)
@@ -481,12 +481,12 @@ namespace CppCompiler.Analysers
                 GenerateC3E(
                     $"{_c3eLineCounter}. T{_temporaryVarCounter} = {leftValue.TokenValue} {opVal.TokenValue} {rightValue.TokenValue}",
                     new Token(TokenType.AssignmentOperator, "="),
-                    new Token(TokenType.Identifier, $"T{_temporaryVarCounter}"),
+                    new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"),
                     leftValue,
                     opVal,
                     rightValue);
 
-                _temporaryVarStack.Push(new Token(TokenType.Undefined, $"T{_temporaryVarCounter}"));
+                _temporaryVarStack.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
             else

@@ -18,6 +18,7 @@
         ReturnCommand,
         GotoCommand,
         Label,
+        TempVariable,
         
         // Boolean Operators
         AndOperator,

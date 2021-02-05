@@ -11,9 +11,54 @@ section .text
 _main:
 
 
+mov ebp, esp
+sub esp, 4
+
+
+push -11
+call _GetStdHandle@4
+mov ebx, eax
+
+
+mov edx, 5h
+add edx, 30h
+mov [num], edx
+WHILE:
+mov edx, cont
+mov eax, 10
+cmp edx, eax
+jae END_WHILE
+mov edx, cont
+mov eax, 5
+cmp edx, eax
+jae END_WHILE
+mov edx, num
+add edx, cont2
+mov [T4], edx
+ELSE:
+mov edx, 0h
+add edx, 30h
+mov [cont], edx
+mov edx, cont
+add edx, 1
+mov [T5], edx
+END_WHILE:
+push 0
+lea eax, [ebp-4]
+push eax
+push 1
+push num
+push ebx
+call _WriteFile@20
+
+
+push 0
+call _ExitProcess@4
+
+
 section .data
 
-cont2 DQ 0
-contador DQ 0
-num DQ 0
-cont DQ 0
+cont2 DB 0
+contador DB 0
+num DB 0
+cont DB 0
