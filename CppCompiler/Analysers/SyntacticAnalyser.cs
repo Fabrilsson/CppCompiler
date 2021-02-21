@@ -3,6 +3,7 @@ using CppCompiler.Enums;
 using CppCompiler.Extensions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace CppCompiler.Analysers
@@ -21,6 +22,8 @@ namespace CppCompiler.Analysers
 
         private Stack<Token> _temporaryVarStack;
 
+        private Stack<Token> _temporaryVarStack2;
+
         private Stack<string> _c3eStack;
 
         private int _temporaryVarCounter;
@@ -35,6 +38,7 @@ namespace CppCompiler.Analysers
             _syntaticAnalyserResult = new SyntaticAnalyserResult();
             _varStack = new Stack<Token>();
             _temporaryVarStack = new Stack<Token>();
+            _temporaryVarStack2 = new Stack<Token>();
             _c3eStack = new Stack<string>();
             _temporaryVarCounter = 0;
             _c3eLineCounter = 0;
@@ -55,6 +59,20 @@ namespace CppCompiler.Analysers
 
             _syntaticAnalyserResult.C3EList = _c3eAnalyserResults;
             _syntaticAnalyserResult.VarStack = _varStack.ToList();
+
+            var file = File.Create($@"{Directory.GetCurrentDirectory()}\programaSimplesC3E.txt");
+
+            file.Close();
+
+            var stringList = new List<string>();
+
+            foreach (var item in _syntaticAnalyserResult.C3EList)
+            {
+                stringList.Add($"{item.LeftMostValue?.TokenValue} {item.LeftMostOperator?.TokenValue} " +
+                    $"{item.LeftValue?.TokenValue} {item.Operator?.TokenValue} {item.RightValue?.TokenValue}");
+            }
+
+            File.WriteAllLines($@"{Directory.GetCurrentDirectory()}\programaSimplesC3E.txt", stringList);
 
             return _syntaticAnalyserResult;
         }
@@ -435,6 +453,7 @@ namespace CppCompiler.Analysers
                     new Token(TokenType.IntegerConstant, "0"));
 
                 _temporaryVarStack.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
+                _temporaryVarStack2.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
             else if (opVal.TokenType.IsLogicOperator())
@@ -474,6 +493,7 @@ namespace CppCompiler.Analysers
                     new Token(TokenType.IntegerConstant, "0"));
 
                 _temporaryVarStack.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
+                _temporaryVarStack2.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
             else if (opVal.TokenType != TokenType.AssignmentOperator)
@@ -487,6 +507,7 @@ namespace CppCompiler.Analysers
                     rightValue);
 
                 _temporaryVarStack.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
+                _temporaryVarStack2.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
             else

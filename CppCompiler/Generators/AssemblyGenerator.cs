@@ -10,109 +10,108 @@ namespace CppCompiler.Generators
     {
         private SyntaticAnalyserResult _syntaticAnalyserResult;
 
+        private Dictionary<string, string> _tempVariables;
+
+        private List<string> _stringList;
+
         internal AssemblyGenerator(SyntaticAnalyserResult syntaticAnalyserResult)
         {
             _syntaticAnalyserResult = syntaticAnalyserResult ?? throw new ArgumentNullException(nameof(syntaticAnalyserResult));
+
+            _tempVariables = new Dictionary<string, string>();
+
+            _stringList = new List<string>() { "global _main\n\n", "extern  _GetStdHandle@4", "extern  _WriteFile@20",
+                "extern  _ExitProcess@4\n\n", "section .text\n", "_main:\n\n" };
         }
 
         internal void Generate()
         {
-            var file = File.Create($@"{Directory.GetCurrentDirectory()}\programaSimples.asm");
+            CreateFile();
 
-            file.Close();
+            AddAsmFileBegining();
 
-            var stringList = new List<string>() { "global _main\n\n", "extern  _GetStdHandle@4", "extern  _WriteFile@20", 
-                "extern  _ExitProcess@4\n\n", "section .text\n", "_main:\n\n" };
-
-            stringList.Add("mov ebp, esp");
-            stringList.Add("sub esp, 4\n\n");
-
-            stringList.Add("push -11");
-            stringList.Add("call _GetStdHandle@4");
-            stringList.Add("mov ebx, eax\n\n");
-
-
+            var localC3EList = new List<C3EAnalyserResult>(_syntaticAnalyserResult.C3EList);
 
             foreach (var item in _syntaticAnalyserResult.C3EList)
             {
                 if(item.Operator?.TokenType == TokenType.AssignmentOperator)
                 {
-                    if (item.LeftValue?.TokenType != TokenType.TempVariable && item.RightValue?.TokenType != TokenType.TempVariable)
+                    if(item.LeftValue?.TokenType == TokenType.TempVariable)
                     {
-                        stringList.Add($"mov edx, {item.RightValue.TokenValue}h");
-                        stringList.Add($"add edx, 30h");
-                        stringList.Add($"mov [{item.LeftValue.TokenValue}], edx");
-                    }
-                    else if(item.LeftValue?.TokenType == TokenType.TempVariable)
-                    {
-                        stringList.Add($"mov edx, {item.RightValue.TokenValue}h");
-                        stringList.Add($"add edx, 30h");
-                        stringList.Add($"mov ebx, edx");
-                    }
-                    else if (item.RightValue?.TokenType == TokenType.TempVariable)
-                    {
-                        stringList.Add($"mov edx, ebx");
-                        stringList.Add($"add edx, 30h");
-                        stringList.Add($"mov [{item.LeftValue.TokenValue}], edx");
-                    }
-                }
-
-                if(item.Operator?.TokenType == TokenType.AdditionOperator)
-                {
-                    stringList.Add($"mov edx, {item.LeftValue.TokenValue}");
-                    stringList.Add($"add edx, {item.RightValue.TokenValue}");
-                    stringList.Add($"mov [{item.LeftMostValue.TokenValue}], edx");
-                }
-
-                if (item.LeftMostOperator?.TokenType == TokenType.Label)
-                {
-                    stringList.Add($"{item.LeftMostOperator.TokenValue}");
-                }
-
-                if(item.LeftMostOperator?.TokenType == TokenType.GotoCommand)
-                {
-                    var elementIndex = _syntaticAnalyserResult.C3EList.IndexOf(item);
-
-                    var element = _syntaticAnalyserResult.C3EList[elementIndex - 1];
-
-                    if (element.LeftMostOperator?.TokenType == TokenType.IfCommand && element.LeftValue.TokenType != TokenType.TempVariable)
-                    {
-                        stringList.Add($"mov edx, {element.LeftValue.TokenValue}");
-                        stringList.Add($"mov eax, {element.RightValue.TokenValue}");
-                        stringList.Add($"cmp edx, eax");
-
-                        if (element.Operator?.TokenType == TokenType.LessThanOperator)
+                        if (item.RightValue?.TokenType == TokenType.IntegerConstant)
                         {
+                            if (!_tempVariables.ContainsKey($"{item.LeftValue?.TokenValue}"))
+                            {
+                                if(!_tempVariables.ContainsValue("ah"))
+                                    _tempVariables.Add($"{item.LeftValue?.TokenValue}", "ah");
+                                else
+                                    _tempVariables.Add($"{item.LeftValue?.TokenValue}", "al");
+                            }
 
-                            stringList.Add($"jae END_WHILE");
+                            _tempVariables.TryGetValue(item.LeftValue?.TokenValue, out string value);
+
+                            _stringList.Add($"mov {value}, {item.RightValue?.TokenValue}");
+
+                            localC3EList.Remove(item);
+
+                            var aaa = localC3EList.IndexOf(item);
                         }
                     }
+
+
                 }
             }
 
-            
-            stringList.Add("push 0");
-            stringList.Add("lea eax, [ebp-4]");
-            stringList.Add("push eax");
-            stringList.Add("push 1");
-            stringList.Add("push num");
-            stringList.Add("push ebx");
-            stringList.Add("call _WriteFile@20");
+            AddAsmFileFinish();
 
+            AddAsmFileDataSection();
 
-            stringList.Add("\n\npush 0");
-            stringList.Add("call _ExitProcess@4\n\n");
+            WriteToFile(_stringList);
 
-            stringList.Add($"section .data\n");
+            Compile();
+        }
+
+        private void CreateFile()
+        {
+            var file = File.Create($@"{Directory.GetCurrentDirectory()}\programaSimples.asm");
+
+            file.Close();
+        }
+
+        private void AddAsmFileBegining()
+        {
+            _stringList.Add("mov ebp, esp");
+            _stringList.Add("sub esp, 4\n\n");
+
+            _stringList.Add("push -11");
+            _stringList.Add("call _GetStdHandle@4");
+            _stringList.Add("mov ebx, eax\n\n");
+        }
+
+        private void AddAsmFileDataSection()
+        {
+            _stringList.Add($"section .data\n");
 
             foreach (var item in _syntaticAnalyserResult.VarStack)
             {
                 if (item.TokenType == TokenType.IntType || item.TokenType == TokenType.FloatType)
-                    stringList.Add($"{item.TokenValue} DB 0");
+                    _stringList.Add($"{item.TokenValue} DB 0");
             }
+        }
 
+        private void AddAsmFileFinish()
+        {
+            _stringList.Add("\n\npush 0");
+            _stringList.Add("call _ExitProcess@4\n\n");
+        }
+
+        private void WriteToFile(IEnumerable<string> stringList)
+        {
             File.WriteAllLines($@"{Directory.GetCurrentDirectory()}\programaSimples.asm", stringList);
+        }
 
+        private void Compile()
+        {
             var proc = new Process();
 
             proc.StartInfo = new ProcessStartInfo();
@@ -120,7 +119,6 @@ namespace CppCompiler.Generators
             proc.StartInfo.FileName = Environment.GetEnvironmentVariable("comspec");
             proc.StartInfo.RedirectStandardInput = true;
             proc.StartInfo.UseShellExecute = false;
-            //proc.StartInfo.Arguments = $@"/c nasm -f win32 {Directory.GetCurrentDirectory()}\programaSimples.asm";
 
             proc.Start();
 
