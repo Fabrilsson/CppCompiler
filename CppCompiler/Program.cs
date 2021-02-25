@@ -20,10 +20,6 @@ namespace CppCompiler
 
             var result = syntaticAnalyser.Execute();
 
-            var assemblyGenerator = new AssemblyGenerator(result);
-
-            assemblyGenerator.Generate();
-
             foreach (var token in tokens)
             {
                 var tokenName = $"TokenType: {token.TokenType}";
@@ -32,6 +28,10 @@ namespace CppCompiler
 
                 Console.WriteLine(string.Format("{0,-40} {1,5}\n", tokenName, tokenValue));
             }
+
+            var assemblyGenerator = new AssemblyGenerator(result);
+
+            assemblyGenerator.Generate();
 
             Console.ReadLine();
         }

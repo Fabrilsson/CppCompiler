@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace CppCompiler.Generators
 {
@@ -34,15 +35,15 @@ namespace CppCompiler.Generators
 
             foreach (var item in _syntaticAnalyserResult.C3EList)
             {
-                if(item.Operator?.TokenType == TokenType.AssignmentOperator)
+                if (item.Operator?.TokenType == TokenType.AssignmentOperator)
                 {
-                    if(item.LeftValue?.TokenType == TokenType.TempVariable)
+                    if (item.LeftValue?.TokenType == TokenType.TempVariable)
                     {
                         if (item.RightValue?.TokenType == TokenType.IntegerConstant)
                         {
                             if (!_tempVariables.ContainsKey($"{item.LeftValue?.TokenValue}"))
                             {
-                                if(!_tempVariables.ContainsValue("ah"))
+                                if (!_tempVariables.ContainsValue("ah"))
                                     _tempVariables.Add($"{item.LeftValue?.TokenValue}", "ah");
                                 else
                                     _tempVariables.Add($"{item.LeftValue?.TokenValue}", "al");
@@ -54,11 +55,35 @@ namespace CppCompiler.Generators
 
                             localC3EList.Remove(item);
 
-                            var aaa = localC3EList.IndexOf(item);
+                            if (!localC3EList.Any(l => l.LeftValue?.TokenValue == item.LeftValue.TokenValue))
+                                _tempVariables.Remove(item.LeftValue.TokenValue);
                         }
                     }
 
+                    if(item.LeftValue?.TokenType == TokenType.Identifier)
+                    {
+                        _stringList.Add($"mov [{item.LeftValue?.TokenValue}], {item.RightValue?.TokenValue}");
+                    }
+                }
 
+                if (item.LeftMostOperator?.TokenType == TokenType.IfCommand)
+                {
+                    if (item.LeftValue?.TokenType == TokenType.TempVariable)
+                    {
+                        if (item.Operator?.TokenType == TokenType.EqualToOperator)
+                        {
+                            if (_tempVariables.ContainsKey($"{item.LeftValue?.TokenValue}"))
+                            {
+                                var aaa = _tempVariables[$"{item.LeftValue?.TokenValue}"];
+                                _stringList.Add($"cmp {aaa}, {item.RightValue?.TokenValue}");
+                            }
+
+                            localC3EList.Remove(item);
+
+                            if (!localC3EList.Any(l => l.LeftValue?.TokenValue == item.LeftValue.TokenValue))
+                                _tempVariables.Remove(item.LeftValue.TokenValue);
+                        }
+                    }
                 }
             }
 
