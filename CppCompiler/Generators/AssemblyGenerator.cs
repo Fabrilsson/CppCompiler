@@ -39,52 +39,41 @@ namespace CppCompiler.Generators
                 {
                     if (item.LeftValue?.TokenType == TokenType.TempVariable)
                     {
-                        if (item.RightValue?.TokenType == TokenType.IntegerConstant)
-                        {
-                            if (!_tempVariables.ContainsKey($"{item.LeftValue?.TokenValue}"))
-                            {
-                                if (!_tempVariables.ContainsValue("ah"))
-                                    _tempVariables.Add($"{item.LeftValue?.TokenValue}", "ah");
-                                else
-                                    _tempVariables.Add($"{item.LeftValue?.TokenValue}", "al");
-                            }
-
-                            _tempVariables.TryGetValue(item.LeftValue?.TokenValue, out string value);
-
-                            _stringList.Add($"mov {value}, {item.RightValue?.TokenValue}");
-
-                            localC3EList.Remove(item);
-
-                            if (!localC3EList.Any(l => l.LeftValue?.TokenValue == item.LeftValue.TokenValue))
-                                _tempVariables.Remove(item.LeftValue.TokenValue);
-                        }
+                        //_stringList.Add($"mov ah, {item.RightValue?.TokenValue}");
+                        _stringList.Add($"mov DWORD [{item.LeftValue?.TokenValue}], {item.RightValue?.TokenValue}");
                     }
 
-                    if(item.LeftValue?.TokenType == TokenType.Identifier)
+                    if (item.LeftValue?.TokenType == TokenType.Identifier)
                     {
-                        _stringList.Add($"mov [{item.LeftValue?.TokenValue}], {item.RightValue?.TokenValue}");
+                        if (item.RightValue?.TokenType == TokenType.Identifier || item.RightValue?.TokenType == TokenType.TempVariable)
+                            _stringList.Add($"mov ah, [{item.RightValue?.TokenValue}]");
+                        else
+                            _stringList.Add($"mov ah, {item.RightValue?.TokenValue}");
+
+                        _stringList.Add($"mov [{item.LeftValue?.TokenValue}], ah");
                     }
                 }
 
-                if (item.LeftMostOperator?.TokenType == TokenType.IfCommand)
+                if (item.LeftMostOperator?.TokenType == TokenType.GotoCommand)
                 {
-                    if (item.LeftValue?.TokenType == TokenType.TempVariable)
-                    {
-                        if (item.Operator?.TokenType == TokenType.EqualToOperator)
+                    var previous = _syntaticAnalyserResult.C3EList.ElementAt(_syntaticAnalyserResult.C3EList.IndexOf(item) - 1);
+
+                    if (previous.LeftMostOperator?.TokenType == TokenType.IfCommand) {
+
+                        if (previous.LeftValue?.TokenType == TokenType.TempVariable)
                         {
-                            if (_tempVariables.ContainsKey($"{item.LeftValue?.TokenValue}"))
+                            _stringList.Add($"cmp DWORD [{previous.LeftValue?.TokenValue}], {previous.RightValue?.TokenValue}");
+
+                            if (previous.Operator?.TokenType == TokenType.EqualToOperator)
                             {
-                                var aaa = _tempVariables[$"{item.LeftValue?.TokenValue}"];
-                                _stringList.Add($"cmp {aaa}, {item.RightValue?.TokenValue}");
+                                _stringList.Add($"je {item.LeftMostValue?.TokenValue.Replace(':', ' ')}");
                             }
-
-                            localC3EList.Remove(item);
-
-                            if (!localC3EList.Any(l => l.LeftValue?.TokenValue == item.LeftValue.TokenValue))
-                                _tempVariables.Remove(item.LeftValue.TokenValue);
                         }
                     }
                 }
+
+                if (item.LeftMostOperator?.TokenType == TokenType.Label)
+                    _stringList.Add($"{item.LeftMostOperator.TokenValue}");
             }
 
             AddAsmFileFinish();
@@ -119,8 +108,8 @@ namespace CppCompiler.Generators
 
             foreach (var item in _syntaticAnalyserResult.VarStack)
             {
-                if (item.TokenType == TokenType.IntType || item.TokenType == TokenType.FloatType)
-                    _stringList.Add($"{item.TokenValue} DB 0");
+                if (item.TokenType == TokenType.IntType || item.TokenType == TokenType.FloatType || item.TokenType == TokenType.TempVariable)
+                    _stringList.Add($"{item.TokenValue} DQ 0");
             }
         }
 
@@ -153,7 +142,7 @@ namespace CppCompiler.Generators
                 if (sw.BaseStream.CanWrite)
                 {
                     sw.WriteLine($@"nasm -f win32 {Directory.GetCurrentDirectory()}\programaSimples.asm");
-                    sw.WriteLine($@"link /subsystem:console /nodefaultlib /entry:main programaSimples.obj kernel32.lib");
+                    //sw.WriteLine($@"link /subsystem:console /nodefaultlib /entry:main programaSimples.obj kernel32.lib");
                     sw.WriteLine($@"gcc programaSimples.obj -o programaSimples.exe");
                 }
             }

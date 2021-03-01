@@ -20,17 +20,27 @@ call _GetStdHandle@4
 mov ebx, eax
 
 
-mov [num], 0
-mov ah, 1
 mov ah, 0
-cmp ah, 0
-mov [cont2], T2
-mov ah, 1
+mov [num], ah
+WHILE:
+mov DWORD [T0], 1
+mov DWORD [T0], 0
+cmp DWORD [T0], 0
+je END_WHILE 
+mov ah, [T2]
+mov [cont2], ah
+mov DWORD [T3], 1
+mov DWORD [T3], 0
+cmp DWORD [T3], 0
+je ELSE 
+mov ah, [T4]
+mov [num], ah
+ELSE:
 mov ah, 0
-cmp ah, 0
-mov [num], T4
-mov [cont], 0
-mov [cont], T5
+mov [cont], ah
+mov ah, [T5]
+mov [cont], ah
+END_WHILE:
 
 
 push 0
@@ -39,7 +49,13 @@ call _ExitProcess@4
 
 section .data
 
-cont2 DB 0
-contador DB 0
-num DB 0
-cont DB 0
+cont2 DQ 0
+contador DQ 0
+num DQ 0
+cont DQ 0
+T5 DQ 0
+T4 DQ 0
+T3 DQ 0
+T2 DQ 0
+T1 DQ 0
+T0 DQ 0

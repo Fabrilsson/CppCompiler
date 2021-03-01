@@ -59,6 +59,7 @@ namespace CppCompiler.Analysers
 
             _syntaticAnalyserResult.C3EList = _c3eAnalyserResults;
             _syntaticAnalyserResult.VarStack = _varStack.ToList();
+            _syntaticAnalyserResult.VarStack.AddRange(_temporaryVarStack2);
 
             var file = File.Create($@"{Directory.GetCurrentDirectory()}\programaSimplesC3E.txt");
 
