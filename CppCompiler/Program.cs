@@ -3,22 +3,23 @@ using CppCompiler.Generators;
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CppCompiler
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             string text = File.ReadAllText($@"{Directory.GetCurrentDirectory()}\programaSimples.txt");
 
             var lexicalAnalyser = new LexicalAnalyser();
 
-            var tokens = lexicalAnalyser.Execute(text);
+            var tokens = await lexicalAnalyser.ExecuteAsync(text);
 
             var syntaticAnalyser = new SyntacticAnalyser(tokens.ToList());
 
-            var result = syntaticAnalyser.Execute();
+            var result = await syntaticAnalyser.ExecuteAsync();
 
             foreach (var token in tokens)
             {
@@ -31,7 +32,7 @@ namespace CppCompiler
 
             var assemblyGenerator = new AssemblyGenerator(result);
 
-            assemblyGenerator.Generate();
+            await assemblyGenerator.GenerateAsync();
 
             Console.ReadLine();
         }

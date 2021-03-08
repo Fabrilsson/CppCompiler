@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CppCompiler.Analysers
 {
@@ -44,11 +45,11 @@ namespace CppCompiler.Analysers
             _c3eLineCounter = 0;
         }
 
-        internal SyntaticAnalyserResult Execute()
+        internal async Task<SyntaticAnalyserResult> ExecuteAsync()
         {
             Main();
 
-            D();
+            await D();
 
             var tempStack = new Stack<string>();
 
@@ -106,7 +107,7 @@ namespace CppCompiler.Analysers
                 throw new Exception();
         }
 
-        private void D()
+        private async Task D()
         {
             While();
 
@@ -115,7 +116,7 @@ namespace CppCompiler.Analysers
             if (_lookAhead.TokenType.IsType())
             {
                 V();//Entende os tipos
-                D();//Depois pode ter qualquer coisa
+                await D();//Depois pode ter qualquer coisa
             }
 
             if (_lookAhead.TokenType != TokenType.RightBracers &&
@@ -124,7 +125,7 @@ namespace CppCompiler.Analysers
             {
                 E();//Entende expressões booleanas e matemáticas
                 MatchToken();
-                D();//Depois pode ter qualquer coisa
+                await D();//Depois pode ter qualquer coisa
             }
         }
 

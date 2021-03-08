@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CppCompiler.Generators
 {
@@ -25,64 +26,68 @@ namespace CppCompiler.Generators
                 "extern  _ExitProcess@4\n\n", "section .text\n", "_main:\n\n" };
         }
 
-        internal void Generate()
+        internal Task GenerateAsync()
         {
-            CreateFile();
-
-            AddAsmFileBegining();
-
-            var localC3EList = new List<C3EAnalyserResult>(_syntaticAnalyserResult.C3EList);
-
-            foreach (var item in _syntaticAnalyserResult.C3EList)
+            return Task.Run(() =>
             {
-                if (item.Operator?.TokenType == TokenType.AssignmentOperator)
+                CreateFile();
+
+                AddAsmFileBegining();
+
+                var localC3EList = new List<C3EAnalyserResult>(_syntaticAnalyserResult.C3EList);
+
+                foreach (var item in _syntaticAnalyserResult.C3EList)
                 {
-                    if (item.LeftValue?.TokenType == TokenType.TempVariable)
+                    if (item.Operator?.TokenType == TokenType.AssignmentOperator)
                     {
-                        //_stringList.Add($"mov ah, {item.RightValue?.TokenValue}");
-                        _stringList.Add($"mov DWORD [{item.LeftValue?.TokenValue}], {item.RightValue?.TokenValue}");
-                    }
-
-                    if (item.LeftValue?.TokenType == TokenType.Identifier)
-                    {
-                        if (item.RightValue?.TokenType == TokenType.Identifier || item.RightValue?.TokenType == TokenType.TempVariable)
-                            _stringList.Add($"mov ah, [{item.RightValue?.TokenValue}]");
-                        else
-                            _stringList.Add($"mov ah, {item.RightValue?.TokenValue}");
-
-                        _stringList.Add($"mov [{item.LeftValue?.TokenValue}], ah");
-                    }
-                }
-
-                if (item.LeftMostOperator?.TokenType == TokenType.GotoCommand)
-                {
-                    var previous = _syntaticAnalyserResult.C3EList.ElementAt(_syntaticAnalyserResult.C3EList.IndexOf(item) - 1);
-
-                    if (previous.LeftMostOperator?.TokenType == TokenType.IfCommand) {
-
-                        if (previous.LeftValue?.TokenType == TokenType.TempVariable)
+                        if (item.LeftValue?.TokenType == TokenType.TempVariable)
                         {
-                            _stringList.Add($"cmp DWORD [{previous.LeftValue?.TokenValue}], {previous.RightValue?.TokenValue}");
+                            //_stringList.Add($"mov ah, {item.RightValue?.TokenValue}");
+                            _stringList.Add($"mov DWORD [{item.LeftValue?.TokenValue}], {item.RightValue?.TokenValue}");
+                        }
 
-                            if (previous.Operator?.TokenType == TokenType.EqualToOperator)
+                        if (item.LeftValue?.TokenType == TokenType.Identifier)
+                        {
+                            if (item.RightValue?.TokenType == TokenType.Identifier || item.RightValue?.TokenType == TokenType.TempVariable)
+                                _stringList.Add($"mov ah, [{item.RightValue?.TokenValue}]");
+                            else
+                                _stringList.Add($"mov ah, {item.RightValue?.TokenValue}");
+
+                            _stringList.Add($"mov [{item.LeftValue?.TokenValue}], ah");
+                        }
+                    }
+
+                    if (item.LeftMostOperator?.TokenType == TokenType.GotoCommand)
+                    {
+                        var previous = _syntaticAnalyserResult.C3EList.ElementAt(_syntaticAnalyserResult.C3EList.IndexOf(item) - 1);
+
+                        if (previous.LeftMostOperator?.TokenType == TokenType.IfCommand)
+                        {
+
+                            if (previous.LeftValue?.TokenType == TokenType.TempVariable)
                             {
-                                _stringList.Add($"je {item.LeftMostValue?.TokenValue.Replace(':', ' ')}");
+                                _stringList.Add($"cmp DWORD [{previous.LeftValue?.TokenValue}], {previous.RightValue?.TokenValue}");
+
+                                if (previous.Operator?.TokenType == TokenType.EqualToOperator)
+                                {
+                                    _stringList.Add($"je {item.LeftMostValue?.TokenValue.Replace(':', ' ')}");
+                                }
                             }
                         }
                     }
+
+                    if (item.LeftMostOperator?.TokenType == TokenType.Label)
+                        _stringList.Add($"{item.LeftMostOperator.TokenValue}");
                 }
 
-                if (item.LeftMostOperator?.TokenType == TokenType.Label)
-                    _stringList.Add($"{item.LeftMostOperator.TokenValue}");
-            }
+                AddAsmFileFinish();
 
-            AddAsmFileFinish();
+                AddAsmFileDataSection();
 
-            AddAsmFileDataSection();
+                WriteToFile(_stringList);
 
-            WriteToFile(_stringList);
-
-            Compile();
+                Compile();
+            });
         }
 
         private void CreateFile()

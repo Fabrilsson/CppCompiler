@@ -3,6 +3,7 @@ using CppCompiler.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace CppCompiler.Analysers
 {
@@ -35,70 +36,82 @@ namespace CppCompiler.Analysers
             {"struct", TokenType.StructType}
         };
 
-        public IEnumerable<Token> Execute(string texto)
+        public async Task<IEnumerable<Token>> ExecuteAsync(string texto)
         {
-            Dictionary<TokenType, string> patterns = new Dictionary<TokenType, string>();
-
-            patterns.Add(TokenType.LeftBracers, @"([{])");
-            patterns.Add(TokenType.RightBracers, @"([}])");
-            patterns.Add(TokenType.LongConstant, @"(\d+[l])");
-            patterns.Add(TokenType.FloatingPointConstant, @"([-+]?[0-9]*\.?[0-9]*([.]|[E])[-+]?[0-9]*)");
-            patterns.Add(TokenType.CharConstant, "('(.)')");
-            patterns.Add(TokenType.StringConstant, "(\"([^\\\"]|\\.)*\")");
-            patterns.Add(TokenType.Identifier, @"([_]*[a-zA-Z][0-9]*)+");
-            patterns.Add(TokenType.IntegerConstant, @"(\d+)");
-            patterns.Add(TokenType.LeftParenthesis, @"([(])");
-            patterns.Add(TokenType.RightParenthesis, @"([)])");
-            patterns.Add(TokenType.GreaterThanOrEqualToOperator, @"([>][=])");
-            patterns.Add(TokenType.LessThanOrEqualToOperator, @"([<][=])");
-            patterns.Add(TokenType.LessThanOperator, "([<])");
-            patterns.Add(TokenType.GreaterThanOperator, "([>])");
-            patterns.Add(TokenType.PowOperator, @"([\^])");
-            patterns.Add(TokenType.EqualToOperator, @"([=][=])");
-            patterns.Add(TokenType.OrOperator, @"([|][|])");
-            patterns.Add(TokenType.AssignmentOperator, "([=])");
-            patterns.Add(TokenType.AdditionOperator, "([+])");
-            patterns.Add(TokenType.SubtractionOperator, "([-])");
-            patterns.Add(TokenType.MultiplicationOperator, "([*])");
-            patterns.Add(TokenType.AndOperator, "([&][&])");
-            patterns.Add(TokenType.NotEqualToOperator, "([!][=])");
-            patterns.Add(TokenType.ModuleOperator, "([%])");
-            patterns.Add(TokenType.DivisionOperator, @"([/])");
-            patterns.Add(TokenType.Semicolon, @"([;])");
-            patterns.Add(TokenType.LeftBrackets, @"([[])");
-            patterns.Add(TokenType.RightBrackets, @"([]])");
-            patterns.Add(TokenType.Comma, @"([,])");
+            var patterns = GetPatterns();
 
             List<Token> result = new List<Token>();
 
             MatchCollection myMatches = Regex.Matches(texto, string.Join("|", patterns.Values));
-            foreach (Match currentMatch in myMatches)
+
+            var task = Task.Run(() =>
             {
-                if (ReservedWords.TryGetValue(currentMatch.Value, out TokenType tokenType))
+                foreach (Match currentMatch in myMatches)
                 {
-                    var token = new Token(tokenType, currentMatch.Value);
-
-                    result.Add(token);
-                }
-                else
-                {
-                    foreach (var pattern in patterns)
+                    if (ReservedWords.TryGetValue(currentMatch.Value, out TokenType tokenType))
                     {
-                        var match = Regex.Match(currentMatch.Value, pattern.Value);
+                        var token = new Token(tokenType, currentMatch.Value);
 
-                        if (!string.IsNullOrEmpty(match.Value))
+                        result.Add(token);
+                    }
+                    else
+                    {
+                        foreach (var pattern in patterns)
                         {
-                            var token = new Token(pattern.Key, currentMatch.Value);
+                            var match = Regex.Match(currentMatch.Value, pattern.Value);
 
-                            result.Add(token);
+                            if (!string.IsNullOrEmpty(match.Value))
+                            {
+                                var token = new Token(pattern.Key, currentMatch.Value);
 
-                            break;
+                                result.Add(token);
+
+                                break;
+                            }
                         }
                     }
                 }
-            }
 
-            return result;
+                return result;
+            });
+
+            return await task;
+        }
+
+        private Dictionary<TokenType, string> GetPatterns()
+        {
+            return new Dictionary<TokenType, string>
+            {
+                { TokenType.LeftBracers, @"([{])" },
+                { TokenType.RightBracers, @"([}])" },
+                { TokenType.LongConstant, @"(\d+[l])" },
+                { TokenType.FloatingPointConstant, @"([-+]?[0-9]*\.?[0-9]*([.]|[E])[-+]?[0-9]*)" },
+                { TokenType.CharConstant, "('(.)')" },
+                { TokenType.StringConstant, "(\"([^\\\"]|\\.)*\")" },
+                { TokenType.Identifier, @"([_]*[a-zA-Z][0-9]*)+" },
+                { TokenType.IntegerConstant, @"(\d+)" },
+                { TokenType.LeftParenthesis, @"([(])" },
+                { TokenType.RightParenthesis, @"([)])" },
+                { TokenType.GreaterThanOrEqualToOperator, @"([>][=])" },
+                { TokenType.LessThanOrEqualToOperator, @"([<][=])" },
+                { TokenType.LessThanOperator, "([<])" },
+                { TokenType.GreaterThanOperator, "([>])" },
+                { TokenType.PowOperator, @"([\^])" },
+                { TokenType.EqualToOperator, @"([=][=])" },
+                { TokenType.OrOperator, @"([|][|])" },
+                { TokenType.AssignmentOperator, "([=])" },
+                { TokenType.AdditionOperator, "([+])" },
+                { TokenType.SubtractionOperator, "([-])" },
+                { TokenType.MultiplicationOperator, "([*])" },
+                { TokenType.AndOperator, "([&][&])" },
+                { TokenType.NotEqualToOperator, "([!][=])" },
+                { TokenType.ModuleOperator, "([%])" },
+                { TokenType.DivisionOperator, @"([/])" },
+                { TokenType.Semicolon, @"([;])" },
+                { TokenType.LeftBrackets, @"([[])" },
+                { TokenType.RightBrackets, @"([]])" },
+                { TokenType.Comma, @"([,])" }
+            };
         }
     }
 }
