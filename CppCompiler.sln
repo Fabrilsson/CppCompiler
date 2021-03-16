@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30320.27
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CppCompiler", "CppCompiler\CppCompiler.csproj", "{ECE22A4B-EF56-4D72-B229-3728CE74332D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CppCompiler.Presentation", "CppCompiler.Presentation\CppCompiler.Presentation.csproj", "{88970FC7-8CFE-4E9B-B4FD-CD6598EA64CF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CppCompiler.Code", "CppCompiler.Code\CppCompiler.Code.csproj", "{F341D1F0-C5C5-4405-8862-9D3E8B175983}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{ECE22A4B-EF56-4D72-B229-3728CE74332D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ECE22A4B-EF56-4D72-B229-3728CE74332D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ECE22A4B-EF56-4D72-B229-3728CE74332D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ECE22A4B-EF56-4D72-B229-3728CE74332D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{88970FC7-8CFE-4E9B-B4FD-CD6598EA64CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{88970FC7-8CFE-4E9B-B4FD-CD6598EA64CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{88970FC7-8CFE-4E9B-B4FD-CD6598EA64CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{88970FC7-8CFE-4E9B-B4FD-CD6598EA64CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F341D1F0-C5C5-4405-8862-9D3E8B175983}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F341D1F0-C5C5-4405-8862-9D3E8B175983}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F341D1F0-C5C5-4405-8862-9D3E8B175983}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F341D1F0-C5C5-4405-8862-9D3E8B175983}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

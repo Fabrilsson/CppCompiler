@@ -1,0 +1,65 @@
+struct Livros {
+    char titulo[50];
+    int id;
+};
+
+void funcao(unsigned int ui){
+    printf("%d\n", ui);
+}
+ 
+int main() {
+
+    struct Livros livro1;
+     
+    int i1 = 1, _i2 = 2;
+    unsigned int ui = 20;
+    float f1 = .5, f2 = .1E5, f3 = 1E-2, f4 = 4.5E10;
+    char c = 'c';
+    char s1[] = "teste1", s2[6] = {'t', 'e', 's', 't', 'e', '2'};
+    short sh = 10;
+    long l = 999999999l;
+    
+    if (i1 < _i2 || (i1 <= _i2 && i1 >= _i2 || (i1 > _i2))){
+        if (i1 != _i2){
+            ui = 21;
+        } else if (i1 == _i2){
+            ui = 22;
+        }
+    }
+    int t;
+    for (t = 1; t < 20; t = t + 1){
+        if (t < 10){
+            printf("%d\n", t);
+            continue;
+        }
+        funcao(t);
+    }
+
+    do{
+        l = l % 1000 + ((50 - 20) / 10 * 2);
+    } while (!l);
+
+    f1 *= 50;
+    f2 /= 10;
+    _i2 %= 2;
+    
+    switch(c) {
+        case 'a':
+            printf("%c\n", c);
+            break;
+        case 'b':
+            printf("%c\n", c);
+            break;
+        case 'c':
+            printf("%c\n", c);
+            break;
+        default:
+            printf("DEFAULT %c\n", c);
+            break;
+    }
+
+    funcao(ui);    
+
+    return 0;
+    
+}

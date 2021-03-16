@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "h8LdOazyrpCSfwmxOh6e1YL40lLGXz+6Z13k8mYyzkmXwgPs34xgmyDcyc8evmoHNrsxa2T9pWWAztDHZPLUNQ==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\fabri\\source\\repos\\CppCompiler\\CppCompiler.Code\\CppCompiler.Code.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\fabri\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\fabri\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
