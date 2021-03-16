@@ -23,14 +23,24 @@ mov ebx, eax
 mov ah, 0
 mov [num], ah
 WHILE:
+cmp DWORD [cont], 10
+jge LS3
 mov DWORD [T0], 1
+je LS5
+LS3:
 mov DWORD [T0], 0
+LS5:
 cmp DWORD [T0], 0
 je END_WHILE 
 mov ah, [T2]
 mov [cont2], ah
+cmp DWORD [cont], 5
+jge LS15
 mov DWORD [T3], 1
+je LS17
+LS15:
 mov DWORD [T3], 0
+LS17:
 cmp DWORD [T3], 0
 je ELSE 
 mov ah, [T4]
@@ -38,9 +48,10 @@ mov [num], ah
 ELSE:
 mov ah, 0
 mov [cont], ah
+je WHILE 
+END_WHILE:
 mov ah, [T5]
 mov [cont], ah
-END_WHILE:
 
 
 push 0

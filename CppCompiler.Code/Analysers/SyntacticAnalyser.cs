@@ -425,13 +425,15 @@ namespace CppCompiler.Analysers
                     new Token(TokenType.IfCommand, "if"),
                     null,
                     leftValue,
-                    opVal,
+                    opVal.Invert(),
                     rightValue);
 
+                var helper = _c3eLineCounter;
+
                 GenerateC3E(
-                    $"{_c3eLineCounter}. goto {_c3eLineCounter + 3}",
+                    $"{_c3eLineCounter}. goto LS{helper}",
                     new Token(TokenType.GotoCommand, "goto"),
-                    new Token(TokenType.Label, $"{_c3eLineCounter + 3}"));
+                    new Token(TokenType.Label, $"LS{helper}"));
 
                 GenerateC3E(
                     $"{_c3eLineCounter}. T{_temporaryVarCounter} = 1",
@@ -441,10 +443,20 @@ namespace CppCompiler.Analysers
                     new Token(TokenType.AssignmentOperator, "="),
                     new Token(TokenType.IntegerConstant, "1"));
 
+                var helper2 = _c3eLineCounter;
+
                 GenerateC3E(
-                    $"{_c3eLineCounter}. goto {_c3eLineCounter + 2}",
+                    $"{_c3eLineCounter}. goto LS{helper2}",
                     new Token(TokenType.GotoCommand, "goto"),
-                    new Token(TokenType.Label, $"{_c3eLineCounter + 2}"));
+                    new Token(TokenType.Label, $"LS{helper2}"));
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. 'LS{helper}:'",
+                    new Token(TokenType.Label, $"LS{helper}:"),
+                    null,
+                    null,
+                    null,
+                    null);
 
                 GenerateC3E(
                     $"{_c3eLineCounter}. T{_temporaryVarCounter} = 0",
@@ -453,6 +465,14 @@ namespace CppCompiler.Analysers
                     new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"),
                     new Token(TokenType.AssignmentOperator, "="),
                     new Token(TokenType.IntegerConstant, "0"));
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. 'LS{helper2}:'",
+                    new Token(TokenType.Label, $"LS{helper2}:"),
+                    null,
+                    null,
+                    null,
+                    null);
 
                 _temporaryVarStack.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
                 _temporaryVarStack2.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
@@ -468,23 +488,12 @@ namespace CppCompiler.Analysers
                     opVal,
                     rightValue);
 
-                GenerateC3E(
-                    $"{_c3eLineCounter}. goto {_c3eLineCounter + 3}",
-                    new Token(TokenType.GotoCommand, "goto"),
-                    new Token(TokenType.Label, $"{_c3eLineCounter + 3}"));
+                var helper = _c3eLineCounter;
 
                 GenerateC3E(
-                    $"{_c3eLineCounter}. T{_temporaryVarCounter} = 0",
-                    null,
-                    null,
-                    new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"),
-                    new Token(TokenType.AssignmentOperator, "="),
-                    new Token(TokenType.IntegerConstant, "1"));
-
-                GenerateC3E(
-                    $"{_c3eLineCounter}. goto {_c3eLineCounter + 2}",
+                    $"{_c3eLineCounter}. goto LS{helper}",
                     new Token(TokenType.GotoCommand, "goto"),
-                    new Token(TokenType.Label, $"{_c3eLineCounter + 2}"));
+                    new Token(TokenType.Label, $"LS{helper}"));
 
                 GenerateC3E(
                     $"{_c3eLineCounter}. T{_temporaryVarCounter} = 1",
@@ -492,7 +501,38 @@ namespace CppCompiler.Analysers
                     null,
                     new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"),
                     new Token(TokenType.AssignmentOperator, "="),
+                    new Token(TokenType.IntegerConstant, "1"));
+
+                var helper2 = _c3eLineCounter;
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. goto LS{helper2}",
+                    new Token(TokenType.GotoCommand, "goto"),
+                    new Token(TokenType.Label, $"LS{helper2}"));
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. 'LS{helper}:'",
+                    new Token(TokenType.Label, $"LS{helper}:"),
+                    null,
+                    null,
+                    null,
+                    null);
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. T{_temporaryVarCounter} = 0",
+                    null,
+                    null,
+                    new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"),
+                    new Token(TokenType.AssignmentOperator, "="),
                     new Token(TokenType.IntegerConstant, "0"));
+
+                GenerateC3E(
+                    $"{_c3eLineCounter}. 'LS{helper2}:'",
+                    new Token(TokenType.Label, $"LS{helper2}:"),
+                    null,
+                    null,
+                    null,
+                    null);
 
                 _temporaryVarStack.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
                 _temporaryVarStack2.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));

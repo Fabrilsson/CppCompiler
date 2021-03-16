@@ -12,15 +12,11 @@ namespace CppCompiler.Generators
     {
         private SyntaticAnalyserResult _syntaticAnalyserResult;
 
-        private Dictionary<string, string> _tempVariables;
-
         private List<string> _stringList;
 
         public AssemblyGenerator(SyntaticAnalyserResult syntaticAnalyserResult)
         {
             _syntaticAnalyserResult = syntaticAnalyserResult ?? throw new ArgumentNullException(nameof(syntaticAnalyserResult));
-
-            _tempVariables = new Dictionary<string, string>();
 
             _stringList = new List<string>() { "global _main\n\n", "extern  _GetStdHandle@4", "extern  _WriteFile@20",
                 "extern  _ExitProcess@4\n\n", "section .text\n", "_main:\n\n" };
@@ -42,7 +38,6 @@ namespace CppCompiler.Generators
                     {
                         if (item.LeftValue?.TokenType == TokenType.TempVariable)
                         {
-                            //_stringList.Add($"mov ah, {item.RightValue?.TokenValue}");
                             _stringList.Add($"mov DWORD [{item.LeftValue?.TokenValue}], {item.RightValue?.TokenValue}");
                         }
 
@@ -64,15 +59,21 @@ namespace CppCompiler.Generators
                         if (previous.LeftMostOperator?.TokenType == TokenType.IfCommand)
                         {
 
-                            if (previous.LeftValue?.TokenType == TokenType.TempVariable)
-                            {
-                                _stringList.Add($"cmp DWORD [{previous.LeftValue?.TokenValue}], {previous.RightValue?.TokenValue}");
+                            _stringList.Add($"cmp DWORD [{previous.LeftValue?.TokenValue}], {previous.RightValue?.TokenValue}");
 
-                                if (previous.Operator?.TokenType == TokenType.EqualToOperator)
-                                {
-                                    _stringList.Add($"je {item.LeftMostValue?.TokenValue.Replace(':', ' ')}");
-                                }
+                            if (previous.Operator?.TokenType == TokenType.EqualToOperator)
+                            {
+                                _stringList.Add($"je {item.LeftMostValue?.TokenValue.Replace(':', ' ')}");
                             }
+
+                            if (previous.Operator?.TokenType == TokenType.GreaterThanOrEqualToOperator)
+                            {
+                                _stringList.Add($"jge {item.LeftMostValue?.TokenValue.Replace(':', ' ')}");
+                            }
+                        }
+                        else
+                        {
+                            _stringList.Add($"je {item.LeftMostValue?.TokenValue.Replace(':', ' ')}");
                         }
                     }
 
@@ -137,6 +138,7 @@ namespace CppCompiler.Generators
             proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             proc.StartInfo.FileName = Environment.GetEnvironmentVariable("comspec");
             proc.StartInfo.RedirectStandardInput = true;
+            proc.StartInfo.RedirectStandardOutput = true;
             proc.StartInfo.UseShellExecute = false;
             proc.StartInfo.CreateNoWindow = true;
 
@@ -152,6 +154,9 @@ namespace CppCompiler.Generators
                     sw.WriteLine($@"gcc programaSimples.obj -o programaSimples.exe");
                 }
             }
+
+            string stdout = proc.StandardOutput.ReadToEnd();
+            proc.WaitForExit();
         }
     }
 }

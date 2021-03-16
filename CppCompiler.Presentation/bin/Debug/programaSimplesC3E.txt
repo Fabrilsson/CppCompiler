@@ -1,27 +1,31 @@
   num = 0
  WHILE:   
- if cont < 10
-6 goto   
+ if cont >= 10
+LS3 goto   
   T0 = 1
-7 goto   
+LS5 goto   
+ LS3:   
   T0 = 0
+ LS5:   
  if T0 == 0
 END_WHILE: goto   
 T1 = contador ^ 2
 T2 = 3.1415 * T1
   cont2 = T2
- if cont < 5
-16 goto   
+ if cont >= 5
+LS15 goto   
   T3 = 1
-17 goto   
+LS17 goto   
+ LS15:   
   T3 = 0
+ LS17:   
  if T3 == 0
 ELSE: goto   
 T4 = num + cont2
   num = T4
  ELSE:   
   cont = 0
-T5 = cont + 1
-  cont = T5
 WHILE: goto   
  END_WHILE:   
+T5 = cont + 1
+  cont = T5
