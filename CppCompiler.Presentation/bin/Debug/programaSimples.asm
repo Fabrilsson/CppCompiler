@@ -48,10 +48,10 @@ mov [num], ah
 ELSE:
 mov ah, 0
 mov [cont], ah
-je WHILE 
-END_WHILE:
 mov ah, [T5]
 mov [cont], ah
+je WHILE 
+END_WHILE:
 
 
 push 0

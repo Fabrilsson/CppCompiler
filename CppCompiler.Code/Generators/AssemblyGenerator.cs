@@ -1,4 +1,5 @@
 ﻿using CppCompiler.Enums;
+using CppCompiler.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -74,6 +75,14 @@ namespace CppCompiler.Generators
                         else
                         {
                             _stringList.Add($"je {item.LeftMostValue?.TokenValue.Replace(':', ' ')}");
+                        }
+                    }
+
+                    if (item.LeftMostValue?.TokenType == TokenType.TempVariable)
+                    {
+                        if (item.LeftMostOperator != null && item.LeftMostOperator.TokenType.IsOperator())
+                        {
+
                         }
                     }
 

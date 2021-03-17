@@ -25,7 +25,7 @@ T4 = num + cont2
   num = T4
  ELSE:   
   cont = 0
-WHILE: goto   
- END_WHILE:   
 T5 = cont + 1
   cont = T5
+WHILE: goto   
+ END_WHILE:   
