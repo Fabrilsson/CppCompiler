@@ -32,6 +32,10 @@ mov DWORD [T0], 0
 LS5:
 cmp DWORD [T0], 0
 je END_WHILE 
+mov eax, contador
+mov [T1], eax
+loopPow:
+mul DWORD [T1]
 mov ah, [T2]
 mov [cont2], ah
 cmp DWORD [cont], 5

@@ -82,7 +82,14 @@ namespace CppCompiler.Generators
                     {
                         if (item.LeftMostOperator != null && item.LeftMostOperator.TokenType.IsOperator())
                         {
-
+                            if (item.Operator != null && item.Operator.TokenType == TokenType.PowOperator)
+                            {
+                                _stringList.Add($"mov eax, {item.LeftValue?.TokenValue}");
+                                _stringList.Add($"mov [{item.LeftMostValue?.TokenValue}], eax");
+                                _stringList.Add($"loopPow:");
+                                _stringList.Add($"mul DWORD [{item.LeftMostValue?.TokenValue}]");
+                                _stringList.Add($"loopPow:");
+                            }
                         }
                     }
 
