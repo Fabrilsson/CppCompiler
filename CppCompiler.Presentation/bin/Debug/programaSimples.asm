@@ -32,7 +32,7 @@ LS5:
 cmp DWORD [T0], 0
 je END_WHILE 
 mov eax, [contador]
-mov ecx, [contador]
+mov ecx, [2]
 mov [T1], eax
 loopPow:
 mul DWORD [T1]
@@ -43,7 +43,7 @@ cmp ecx, 1
 je exitLoopPow
 jmp loopPow
 exitLoopPow:
-mov eax, [T100]
+mov eax, [3.1415]
 mul DWORD [T1]
 mov [T2], eax
 mov DWORD [cont2], T2
@@ -80,4 +80,3 @@ T3 DQ 0
 T2 DQ 0
 T1 DQ 0
 T0 DQ 0
-T100 DQ 3.1415
