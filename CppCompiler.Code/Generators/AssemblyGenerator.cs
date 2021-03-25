@@ -37,20 +37,20 @@ namespace CppCompiler.Generators
                 {
                     if (item.Operator?.TokenType == TokenType.AssignmentOperator)
                     {
-                        if (item.LeftValue?.TokenType == TokenType.TempVariable)
-                        {
+                        //if (item.LeftValue?.TokenType == TokenType.TempVariable)
+                        //{
                             _stringList.Add($"mov DWORD [{item.LeftValue?.TokenValue}], {item.RightValue?.TokenValue}");
-                        }
+                        //}
 
-                        if (item.LeftValue?.TokenType == TokenType.Identifier)
-                        {
-                            if (item.RightValue?.TokenType == TokenType.Identifier || item.RightValue?.TokenType == TokenType.TempVariable)
-                                _stringList.Add($"mov ah, [{item.RightValue?.TokenValue}]");
-                            else
-                                _stringList.Add($"mov ah, {item.RightValue?.TokenValue}");
+                        //if (item.LeftValue?.TokenType == TokenType.Identifier)
+                        //{
+                        //    if (item.RightValue?.TokenType == TokenType.Identifier || item.RightValue?.TokenType == TokenType.TempVariable)
+                        //        _stringList.Add($"mov ah, [{item.RightValue?.TokenValue}]");
+                        //    else
+                        //        _stringList.Add($"mov ah, {item.RightValue?.TokenValue}");
 
-                            _stringList.Add($"mov [{item.LeftValue?.TokenValue}], ah");
-                        }
+                        //    _stringList.Add($"mov [{item.LeftValue?.TokenValue}], ah");
+                        //}
                     }
 
                     if (item.LeftMostOperator?.TokenType == TokenType.GotoCommand)
@@ -84,11 +84,25 @@ namespace CppCompiler.Generators
                         {
                             if (item.Operator != null && item.Operator.TokenType == TokenType.PowOperator)
                             {
-                                _stringList.Add($"mov eax, {item.LeftValue?.TokenValue}");
+                                _stringList.Add($"mov eax, [{item.LeftValue?.TokenValue}]");
+                                _stringList.Add($"mov ecx, [{item.LeftValue?.TokenValue}]");
                                 _stringList.Add($"mov [{item.LeftMostValue?.TokenValue}], eax");
                                 _stringList.Add($"loopPow:");
                                 _stringList.Add($"mul DWORD [{item.LeftMostValue?.TokenValue}]");
-                                _stringList.Add($"loopPow:");
+                                _stringList.Add($"mov [{item.LeftMostValue?.TokenValue}], eax");
+                                _stringList.Add($"mov eax, [{item.LeftValue?.TokenValue}]");
+                                _stringList.Add($"dec ecx");
+                                _stringList.Add($"cmp ecx, 1");
+                                _stringList.Add($"je exitLoopPow");
+                                _stringList.Add($"jmp loopPow");
+                                _stringList.Add($"exitLoopPow:");
+                            }
+
+                            if (item.Operator != null && item.Operator.TokenType == TokenType.MultiplicationOperator)
+                            {
+                                _stringList.Add($"mov eax, [{item.LeftValue?.TokenValue}]");
+                                _stringList.Add($"mul DWORD [{item.RightValue?.TokenValue}]");
+                                _stringList.Add($"mov [{item.LeftMostValue?.TokenValue}], eax");
                             }
                         }
                     }

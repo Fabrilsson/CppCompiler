@@ -20,8 +20,7 @@ call _GetStdHandle@4
 mov ebx, eax
 
 
-mov ah, 0
-mov [num], ah
+mov DWORD [num], 0
 WHILE:
 cmp DWORD [cont], 10
 jge LS3
@@ -32,12 +31,22 @@ mov DWORD [T0], 0
 LS5:
 cmp DWORD [T0], 0
 je END_WHILE 
-mov eax, contador
+mov eax, [contador]
+mov ecx, [contador]
 mov [T1], eax
 loopPow:
 mul DWORD [T1]
-mov ah, [T2]
-mov [cont2], ah
+mov [T1], eax
+mov eax, [contador]
+dec ecx
+cmp ecx, 1
+je exitLoopPow
+jmp loopPow
+exitLoopPow:
+mov eax, [T100]
+mul DWORD [T1]
+mov [T2], eax
+mov DWORD [cont2], T2
 cmp DWORD [cont], 5
 jge LS15
 mov DWORD [T3], 1
@@ -47,13 +56,10 @@ mov DWORD [T3], 0
 LS17:
 cmp DWORD [T3], 0
 je ELSE 
-mov ah, [T4]
-mov [num], ah
+mov DWORD [num], T4
 ELSE:
-mov ah, 0
-mov [cont], ah
-mov ah, [T5]
-mov [cont], ah
+mov DWORD [cont], 0
+mov DWORD [cont], T5
 je WHILE 
 END_WHILE:
 
@@ -74,3 +80,4 @@ T3 DQ 0
 T2 DQ 0
 T1 DQ 0
 T0 DQ 0
+T100 DQ 3.1415

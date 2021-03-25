@@ -6,3 +6,4 @@ C:\Users\fabri\source\repos\CppCompiler\CppCompiler.Code\obj\Debug\netstandard2.
 C:\Users\fabri\source\repos\CppCompiler\CppCompiler.Code\obj\Debug\netstandard2.0\CppCompiler.Code.csproj.CoreCompileInputs.cache
 C:\Users\fabri\source\repos\CppCompiler\CppCompiler.Code\obj\Debug\netstandard2.0\CppCompiler.Code.dll
 C:\Users\fabri\source\repos\CppCompiler\CppCompiler.Code\obj\Debug\netstandard2.0\CppCompiler.Code.pdb
+C:\Users\fabri\source\repos\CppCompiler\CppCompiler.Code\obj\Debug\netstandard2.0\CppCompiler.Code.csprojAssemblyReference.cache
