@@ -37,20 +37,7 @@ namespace CppCompiler.Generators
                 {
                     if (item.Operator?.TokenType == TokenType.AssignmentOperator)
                     {
-                        //if (item.LeftValue?.TokenType == TokenType.TempVariable)
-                        //{
-                            _stringList.Add($"mov DWORD [{item.LeftValue?.TokenValue}], {item.RightValue?.TokenValue}");
-                        //}
-
-                        //if (item.LeftValue?.TokenType == TokenType.Identifier)
-                        //{
-                        //    if (item.RightValue?.TokenType == TokenType.Identifier || item.RightValue?.TokenType == TokenType.TempVariable)
-                        //        _stringList.Add($"mov ah, [{item.RightValue?.TokenValue}]");
-                        //    else
-                        //        _stringList.Add($"mov ah, {item.RightValue?.TokenValue}");
-
-                        //    _stringList.Add($"mov [{item.LeftValue?.TokenValue}], ah");
-                        //}
+                        _stringList.Add($"mov DWORD [{item.LeftValue?.TokenValue}], {item.RightValue?.TokenValue}");
                     }
 
                     if (item.LeftMostOperator?.TokenType == TokenType.GotoCommand)
