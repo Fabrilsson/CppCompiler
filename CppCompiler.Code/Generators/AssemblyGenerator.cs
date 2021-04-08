@@ -69,6 +69,11 @@ namespace CppCompiler.Generators
                     {
                         if (item.LeftMostOperator != null && item.LeftMostOperator.TokenType.IsOperator())
                         {
+                            if(item.LeftValue?.TokenType == TokenType.FloatingPointConstant || item.RightValue?.TokenType == TokenType.FloatingPointConstant)
+                            {
+
+                            }
+
                             if (item.Operator != null && item.Operator.TokenType == TokenType.PowOperator)
                             {
                                 _stringList.Add($"mov eax, [{item.LeftValue?.TokenValue}]");

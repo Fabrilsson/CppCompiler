@@ -23,7 +23,7 @@ namespace CppCompiler.Analysers
 
         private Stack<Token> _temporaryVarStack;
 
-        private Stack<Token> _temporaryVarStack2;
+        private Stack<Token> _temporaryVarStackAcumulator;
 
         private Stack<string> _c3eStack;
 
@@ -39,7 +39,7 @@ namespace CppCompiler.Analysers
             _syntaticAnalyserResult = new SyntaticAnalyserResult();
             _varStack = new Stack<Token>();
             _temporaryVarStack = new Stack<Token>();
-            _temporaryVarStack2 = new Stack<Token>();
+            _temporaryVarStackAcumulator = new Stack<Token>();
             _c3eStack = new Stack<string>();
             _temporaryVarCounter = 0;
             _c3eLineCounter = 0;
@@ -60,7 +60,7 @@ namespace CppCompiler.Analysers
 
             _syntaticAnalyserResult.C3EList = _c3eAnalyserResults;
             _syntaticAnalyserResult.VarStack = _varStack.ToList();
-            _syntaticAnalyserResult.VarStack.AddRange(_temporaryVarStack2);
+            _syntaticAnalyserResult.VarStack.AddRange(_temporaryVarStackAcumulator);
 
             var file = File.Create($@"{Directory.GetCurrentDirectory()}\programaSimplesC3E.txt");
 
@@ -109,9 +109,9 @@ namespace CppCompiler.Analysers
 
         private async Task D()
         {
-            While();
+            await While();
 
-            If();
+            await If();
 
             if (_lookAhead.TokenType.IsType())
             {
@@ -129,7 +129,7 @@ namespace CppCompiler.Analysers
             }
         }
 
-        private void While()
+        private async Task While()
         {
             if (_lookAhead.TokenType == TokenType.WhileCommand)
             {
@@ -163,7 +163,7 @@ namespace CppCompiler.Analysers
 
                 MatchToken(); //LeftBracers
 
-                D();//Depois pode ter qualquer coisa
+                await D();//Depois pode ter qualquer coisa
 
                 GenerateC3E(
                     $"{_c3eLineCounter}. goto 'WHILE:'",
@@ -182,11 +182,11 @@ namespace CppCompiler.Analysers
                     null);
 
                 MatchToken();
-                D();//Depois pode ter qualquer coisa
+                await D();//Depois pode ter qualquer coisa
             }
         }
 
-        private void If()
+        private async Task If()
         {
             if (_lookAhead.TokenType == TokenType.IfCommand)
             {
@@ -210,7 +210,7 @@ namespace CppCompiler.Analysers
                     null);
 
                 MatchToken(); //LeftBracers
-                D();//Depois pode ter qualquer coisa
+                await D();//Depois pode ter qualquer coisa
                     //como saber se vai ter um else ou não?
                 MatchToken();//RightBracers
 
@@ -222,19 +222,19 @@ namespace CppCompiler.Analysers
                     null,
                     null);
 
-                Else();
+                await Else();
 
-                D();//Depois pode ter qualquer coisa
+                await D();//Depois pode ter qualquer coisa
             }
         }
 
-        private void Else()
+        private async Task Else()
         {
             if (_lookAhead.TokenType == TokenType.ElseCommand)
             {
                 MatchToken();//match else
                 MatchToken(); //LeftBracers
-                D();//Depois pode ter qualquer coisa
+                await D();//Depois pode ter qualquer coisa
                 MatchToken();//RightBracers     
             }
         }
@@ -418,75 +418,28 @@ namespace CppCompiler.Analysers
 
         private void GenerateC3E(Token leftValue, Token opVal, Token rightValue)
         {
-            if (opVal.TokenType.IsComparisonOperator())
+            if (opVal.TokenType.IsComparisonOperator() || opVal.TokenType.IsLogicOperator())
             {
-                GenerateC3E(
-                    $"{_c3eLineCounter}. if {leftValue.TokenValue} {opVal.TokenValue.Invert()} {rightValue.TokenValue}",
-                    new Token(TokenType.IfCommand, "if"),
-                    null,
-                    leftValue,
-                    opVal.Invert(),
-                    rightValue);
-
-                var helper = _c3eLineCounter;
-
-                GenerateC3E(
-                    $"{_c3eLineCounter}. goto LS{helper}",
-                    new Token(TokenType.GotoCommand, "goto"),
-                    new Token(TokenType.Label, $"LS{helper}"));
-
-                GenerateC3E(
-                    $"{_c3eLineCounter}. T{_temporaryVarCounter} = 1",
-                    null,
-                    null,
-                    new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"),
-                    new Token(TokenType.AssignmentOperator, "="),
-                    new Token(TokenType.IntegerConstant, "1"));
-
-                var helper2 = _c3eLineCounter;
-
-                GenerateC3E(
-                    $"{_c3eLineCounter}. goto LS{helper2}",
-                    new Token(TokenType.GotoCommand, "goto"),
-                    new Token(TokenType.Label, $"LS{helper2}"));
-
-                GenerateC3E(
-                    $"{_c3eLineCounter}. 'LS{helper}:'",
-                    new Token(TokenType.Label, $"LS{helper}:"),
-                    null,
-                    null,
-                    null,
-                    null);
-
-                GenerateC3E(
-                    $"{_c3eLineCounter}. T{_temporaryVarCounter} = 0",
-                    null,
-                    null,
-                    new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"),
-                    new Token(TokenType.AssignmentOperator, "="),
-                    new Token(TokenType.IntegerConstant, "0"));
-
-                GenerateC3E(
-                    $"{_c3eLineCounter}. 'LS{helper2}:'",
-                    new Token(TokenType.Label, $"LS{helper2}:"),
-                    null,
-                    null,
-                    null,
-                    null);
-
-                _temporaryVarStack.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
-                _temporaryVarStack2.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
-                _temporaryVarCounter++;
-            }
-            else if (opVal.TokenType.IsLogicOperator())
-            {
-                GenerateC3E(
+                if (opVal.TokenType.IsComparisonOperator())
+                {
+                    GenerateC3E(
+                        $"{_c3eLineCounter}. if {leftValue.TokenValue} {opVal.TokenValue.Invert()} {rightValue.TokenValue}",
+                        new Token(TokenType.IfCommand, "if"),
+                        null,
+                        leftValue,
+                        opVal.Invert(),
+                        rightValue);
+                }
+                else
+                {
+                    GenerateC3E(
                     $"{_c3eLineCounter}. if {leftValue.TokenValue} {opVal.TokenValue} {rightValue.TokenValue}",
                     new Token(TokenType.IfCommand, "if"),
                     null,
                     leftValue,
                     opVal,
                     rightValue);
+                }
 
                 var helper = _c3eLineCounter;
 
@@ -535,7 +488,7 @@ namespace CppCompiler.Analysers
                     null);
 
                 _temporaryVarStack.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
-                _temporaryVarStack2.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
+                _temporaryVarStackAcumulator.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
             else if (opVal.TokenType != TokenType.AssignmentOperator)
@@ -549,7 +502,7 @@ namespace CppCompiler.Analysers
                     rightValue);
 
                 _temporaryVarStack.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
-                _temporaryVarStack2.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
+                _temporaryVarStackAcumulator.Push(new Token(TokenType.TempVariable, $"T{_temporaryVarCounter}"));
                 _temporaryVarCounter++;
             }
             else
