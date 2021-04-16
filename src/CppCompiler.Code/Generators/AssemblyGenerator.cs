@@ -33,8 +33,10 @@ namespace CppCompiler.Generators
 
                 var localC3EList = new List<C3EAnalyserResult>(_syntaticAnalyserResult.C3EList);
 
-                foreach (var item in _syntaticAnalyserResult.C3EList)
+                for (int i = 0; i < _syntaticAnalyserResult.C3EList.Count; i++)
                 {
+                    var item = _syntaticAnalyserResult.C3EList[i];
+
                     if (item.Operator?.TokenType == TokenType.AssignmentOperator)
                     {
                         _stringList.Add($"mov DWORD [{item.LeftValue?.TokenValue}], {item.RightValue?.TokenValue}");
@@ -69,7 +71,7 @@ namespace CppCompiler.Generators
                     {
                         if (item.LeftMostOperator != null && item.LeftMostOperator.TokenType.IsOperator())
                         {
-                            if(item.LeftValue?.TokenType == TokenType.FloatingPointConstant || item.RightValue?.TokenType == TokenType.FloatingPointConstant)
+                            if (item.LeftValue?.TokenType == TokenType.FloatingPointConstant || item.RightValue?.TokenType == TokenType.FloatingPointConstant)
                             {
 
                             }
@@ -172,7 +174,6 @@ namespace CppCompiler.Generators
                 if (sw.BaseStream.CanWrite)
                 {
                     sw.WriteLine($@"nasm -f win32 {Directory.GetCurrentDirectory()}\programaSimples.asm");
-                    //sw.WriteLine($@"link /subsystem:console /nodefaultlib /entry:main programaSimples.obj kernel32.lib");
                     sw.WriteLine($@"gcc programaSimples.obj -o programaSimples.exe");
                 }
             }

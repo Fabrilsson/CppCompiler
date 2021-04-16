@@ -46,8 +46,10 @@ namespace CppCompiler.Analysers
 
             var task = Task.Run(() =>
             {
-                foreach (Match currentMatch in myMatches)
+                for (int i = 0; i < myMatches.Count; i++)
                 {
+                    var currentMatch = myMatches[i];
+
                     if (ReservedWords.TryGetValue(currentMatch.Value, out TokenType tokenType))
                     {
                         var token = new Token(tokenType, currentMatch.Value);
